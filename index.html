@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>María del Mar &amp; Faiber</title>
+<link rel="icon" type="image/svg+xml" href="fotos/insignia.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest: #24402F;
+    --sage: #7C9473;
+    --sage-light: #A9BE9E;
+    --paper: #F8F4EA;
+    --paper-deep: #EFE7D3;
+    --paper-card: #FCFAF4;
+    --gold: #B08A4E;
+    --blush: #E4B7B0;
+    --ink: #2B2A24;
+    --line: rgba(36,64,47,0.16);
+    --shadow: 0 14px 34px rgba(36,64,47,0.10);
+    --ease: cubic-bezier(.2,.7,.2,1);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{ color: var(--forest); }
+
+  .wrap{ max-width: 680px; margin: 0 auto; padding: 0 24px; position:relative; z-index:1; }
+
+  .ico{ width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* ---------- Barra de progreso de scroll ---------- */
+  #progress{
+    position:fixed; top:0; left:0; right:0; height:3px; z-index:60;
+    background: linear-gradient(90deg, var(--sage), var(--gold));
+    transform: scaleX(0); transform-origin: 0 50%;
+    pointer-events:none;
+  }
+
+  /* ---------- Decoración botánica ---------- */
+  .branch{ position:absolute; pointer-events:none; opacity:0; }
+  .branch svg{ display:block; width:100%; height:100%; transform-origin: 0 0; }
+
+  /* ---------- Estados de carga / error ---------- */
+  #loading, #notfound{
+    min-height: 100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: 24px;
+  }
+  #loading p, #notfound p{ font-family:'Fraunces', serif; font-size:1.3rem; color:var(--forest); }
+  .leaf-spin{
+    width:34px; height:34px; border-radius:50%;
+    border: 2px solid var(--sage-light); border-top-color: var(--forest);
+    animation: spin 0.9s linear infinite; margin-bottom: 18px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  #notfound{ display:none; }
+
+  /* ---------- Insignia (monograma M y F) ---------- */
+  .insignia{ display:block; margin:0 auto; width: clamp(104px, 26vw, 140px); aspect-ratio:1; color: var(--ink); user-select:none; }
+  .hero-insignia{ margin-bottom: 10px; color:#F6EFDC; }
+
+  /* ---------- Sobre ---------- */
+  #envelope-screen{
+    display:none; position:fixed; inset:0; z-index: 40; overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% 36%, rgba(176,138,78,.16), transparent 55%),
+      radial-gradient(ellipse at 50% 40%, #2E5039 0%, #24402F 45%, #1B3324 100%);
+    align-items:center; justify-content:center; flex-direction:column; text-align:center; padding: 20px;
+  }
+  #envelope-screen .petals{ z-index:1; }
+  .env-branch{ position:absolute; pointer-events:none; opacity:0; width:200px; height:200px; z-index:0; animation: envBranchIn 1.8s var(--ease) .2s forwards; }
+  .env-branch svg{ display:block; width:100%; height:100%; transform-origin: 0 0; animation: sway 7s ease-in-out infinite alternate; }
+  .env-branch-1{ top:-26px; left:-36px; }
+  .env-branch-2{ bottom:-26px; right:-36px; transform: rotate(180deg); }
+  @keyframes envBranchIn{ from{ opacity:0; } to{ opacity:.6; } }
+  .env-eyebrow{
+    position:relative; z-index:2; margin: 0 0 26px; font-family:'Fraunces', serif; font-style:italic; font-weight:400;
+    font-size: clamp(1.15rem, 4.4vw, 1.5rem); color: #EFE3C2; animation: riseIn 1s var(--ease) .15s backwards; transition: opacity .4s;
+  }
+  #envelope-screen.visible{ display:flex; cursor:pointer; }
+
+  .envelope-scene{ position:relative; z-index:2; perspective: 1600px; width: 100%; display:flex; justify-content:center; transform-origin: 50% 32%; transition: transform 1.1s cubic-bezier(.5,0,.2,1); }
+  #envelope-screen.zoom .envelope-scene{ transform: translate(var(--zx,0), var(--zy,0)) scale(var(--zs,2)); }
+  #envelope-screen.zoom{ animation: envFade .55s ease .8s forwards; }
+
+  .envelope{
+    --w: clamp(250px, min(82vw, 46vh), 400px);
+    --h: calc(var(--w) * 0.64);
+    --lh: calc(var(--w) * 1.15);
+    position:relative; width: var(--w); height: var(--h);
+    transform: rotate(-1deg); transition: transform .9s cubic-bezier(.4,0,.2,1);
+  }
+  .envelope{ animation: envIn 1.2s var(--ease) backwards; cursor:default; }
+  .envelope.opening{ transform: translateY(calc(var(--w) * 0.2)) rotate(0deg); }
+  @keyframes envIn{
+    from{ opacity:0; transform: translateY(54px) scale(.9) rotate(-6deg); }
+    to{ opacity:1; transform: translateY(0) scale(1) rotate(-1deg); }
+  }
+
+  .envelope::before{
+    content:""; position:absolute; left:6%; right:6%; bottom:-18px; height:26px; border-radius:50%;
+    background: rgba(0,0,0,.5); filter: blur(16px); z-index:-1;
+  }
+  .envelope::after{
+    content:""; position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:0.06; mix-blend-mode:multiply; z-index:7; pointer-events:none;
+  }
+
+  .env-address{ position:absolute; left:7%; right:7%; bottom: 4%; text-align:center; z-index:4; pointer-events:none; line-height:1.25; }
+  .env-address .line{ display:block; font-family:'Fraunces', serif; font-style: italic; font-size: clamp(1rem, 3.7vw, 1.3rem); }
+  .env-address .to{ font-weight:500; font-size:.78em; color: #7A6A58; margin-right: .3em; }
+  .env-address .name{ font-weight:600; color: #3E2F22; }
+  .env-address .with{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin-top: 2px; font-family:'Fraunces', serif; font-style: italic; font-size: clamp(.68rem, 2.5vw, .84rem); color: #6B5A48;
+  }
+  .env-address .with:empty{ display:none; }
+
+  .env-base{
+    position:absolute; inset:0; z-index:2; background:#E8DEC9;
+    clip-path: polygon(0 -1px, 0 100%, 100% 100%, 100% -1px, 50% calc(50% - 1.5px));
+  }
+  .env-side{ position:absolute; bottom:0; width:0; height:0; border-top: calc(var(--h)/2) solid transparent; border-bottom: calc(var(--h)/2) solid transparent; z-index:3; }
+  .env-side-left{ left:0; border-left: calc(var(--w)/2) solid #EFE6D3; }
+  .env-side-right{ right:0; border-right: calc(var(--w)/2) solid #F6EFE0; }
+
+  .env-bottom{
+    position:absolute; bottom:0; left:0; width:0; height:0;
+    border-left: calc(var(--w)/2) solid transparent; border-right: calc(var(--w)/2) solid transparent;
+    border-bottom: calc(var(--h)/2) solid #E8DEC9; z-index:3;
+  }
+
+  .env-flap{
+    position:absolute; top:0; left:0; width:0; height:0;
+    border-left: calc(var(--w)/2) solid transparent; border-right: calc(var(--w)/2) solid transparent;
+    border-top: calc(var(--h)/2) solid #F3ECDB;
+    transform-origin: top; transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(.4,0,.2,1), z-index 0s linear 0.35s;
+    box-shadow: 0 4px 10px rgba(60,45,25,0.16); z-index: 5;
+  }
+
+  .env-seal{
+    position:absolute; left: 50%; top: calc(var(--h)/2); width: 20%; aspect-ratio:1;
+    transform: translate(-50%,-50%);
+    border-radius: 47% 53% 52% 48% / 54% 46% 55% 45%;
+    background: radial-gradient(circle at 34% 28%, #8C2A38, #6B1B26 55%, #4A1018 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 10px 20px rgba(40,10,15,0.4), inset 0 -5px 9px rgba(30,5,8,0.4), inset 0 3px 5px rgba(255,255,255,0.08);
+    z-index: 6; transition: opacity 0.3s;
+    animation: sealPop .8s cubic-bezier(.34,1.56,.64,1) .95s backwards;
+  }
+  @keyframes sealPop{ from{ scale:0; opacity:0; } to{ scale:1; opacity:1; } }
+  .env-seal::after{
+    content:""; position:absolute; inset:-5px; border-radius:inherit;
+    border: 1px solid rgba(140,42,56,.55); animation: sealRing 2.4s ease-out infinite;
+  }
+  @keyframes sealRing{ 0%{ transform:scale(1); opacity:.9; } 100%{ transform:scale(1.55); opacity:0; } }
+  .env-seal .insignia{ width: 90%; height: 90%; color:#F6E8DF; filter: drop-shadow(0 1px 1px rgba(30,5,8,.5)); margin:0; }
+
+  /* Carta = miniatura de la invitación real (la unidad --u escala todo el contenido) */
+  .env-letter{
+    --u: calc(var(--w) * 0.86 / 390);
+    position:absolute; left:7%; width:86%; height: var(--lh);
+    top: calc(var(--h) * 0.94 - var(--lh));
+    background:#1B3324; border-radius: 6px; overflow:hidden; z-index:1;
+    box-shadow: 0 10px 22px rgba(0,0,0,.3);
+    clip-path: inset(calc(var(--lh) - var(--h) * 0.88) 0 0 0);
+    transition: transform .95s cubic-bezier(.4,0,.2,1) .25s, clip-path .95s cubic-bezier(.4,0,.2,1) .25s;
+  }
+  .mini{ position:absolute; inset:0; color:#FBF6EA; text-align:center; }
+  .mini .mini-ins{ position:absolute; left:50%; top: calc(20 * var(--u)); width: calc(76 * var(--u)); height: calc(76 * var(--u)); margin:0; transform: translateX(-50%); color:#F6EFDC; }
+  .mini-eyebrow{ position:absolute; left:0; right:0; top: calc(106 * var(--u)); margin:0; font-size: calc(8.5 * var(--u)); letter-spacing:.34em; text-transform:uppercase; color: var(--sage-light); }
+  .mini-names{ position:absolute; left:0; right:0; top: calc(122 * var(--u)); margin:0; font-family:'Fraunces', serif; font-weight:500; font-size: calc(31 * var(--u)); line-height:1.08; }
+  .mini-names span{ display:block; font-style:italic; font-weight:300; color: var(--gold); font-size: .5em; margin: calc(3 * var(--u)) 0; }
+  .mini-orn{ position:absolute; left:0; right:0; top: calc(220 * var(--u)); display:flex; align-items:center; justify-content:center; gap: calc(8 * var(--u)); }
+  .mini-orn i{ display:block; height:1px; width: calc(48 * var(--u)); background: linear-gradient(90deg, transparent, var(--gold)); }
+  .mini-orn i:last-child{ background: linear-gradient(270deg, transparent, var(--gold)); }
+  .mini-orn b{ width: calc(5 * var(--u)); height: calc(5 * var(--u)); background: var(--gold); transform: rotate(45deg); }
+  .mini-date{ position:absolute; left:0; right:0; top: calc(232 * var(--u)); margin:0; font-size: calc(10 * var(--u)); letter-spacing:.16em; }
+  .mini-photo{
+    position:absolute; left:0; right:0; top: calc(258 * var(--u)); bottom:0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40%); mask-image: linear-gradient(to bottom, transparent 0, #000 40%);
+  }
+  .mini-photo img{ display:block; width:100%; height:100%; object-fit:cover; object-position: 50% 28%; }
+  .mini-wave{ position:absolute; left:-3%; width:106%; bottom:-1px; height: calc(34 * var(--u)); }
+  .mini-wave .b{ fill: var(--sage-light); opacity:.6; }
+  .mini-wave .f{ fill: var(--paper); }
+
+  .envelope.opening .env-flap{ transform: rotateX(180deg); z-index: 0; transition: transform 0.7s cubic-bezier(.4,0,.2,1), z-index 0s linear 0.32s; }
+  .envelope.opening .env-seal{ opacity:0; transition: opacity 0.2s; }
+  .envelope.opening .env-letter{ transform: translateY(calc(var(--h) * -0.32)); clip-path: inset(0 -40px -40px -40px); }
+  /* Al ampliar: la carta pasa al frente y el sobre se desvanece */
+  .envelope.pull .env-letter{ z-index: 9; clip-path: inset(0 -40px -40px -40px); }
+  .envelope.pull .env-base, .envelope.pull .env-side, .envelope.pull .env-bottom, .envelope.pull .env-flap, .envelope.pull .env-address{ opacity:0; transition: opacity .5s ease; }
+  .envelope.pull::before, .envelope.pull::after{ opacity:0; transition: opacity .5s ease; }
+  #envelope-screen.opening-on .env-eyebrow{ opacity:0; transition: opacity .2s; }
+  #envelope-screen.opening-on .env-hint{ animation:none; opacity:0; transition: opacity .2s; }
+
+  .env-hint{ position:absolute; left:0; right:0; bottom: max(26px, 6vh); z-index:2; margin:0; font-size: 0.78rem; letter-spacing: .24em; text-transform: uppercase; color: var(--sage-light); animation: hintPulse 2.4s ease-in-out infinite; }
+  @keyframes hintPulse{ 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
+
+  #envelope-screen.fade-out{ animation: envFade 0.6s ease forwards; }
+  @keyframes envFade{ to{ opacity:0; visibility:hidden; } }
+
+  /* ---------- Entradas animadas (hero) ---------- */
+  #app{ display:none; }
+  .st{ opacity:0; }
+  #app.entered .st{ animation: riseIn 1.1s var(--ease) both; animation-delay: var(--d, 0s); }
+  @keyframes riseIn{
+    from{ opacity:0; transform: translateY(24px); filter: blur(5px); }
+    to{ opacity:1; transform:none; filter:none; }
+  }
+  #app.entered .branch{ animation: branchIn 1.6s var(--ease) .2s both; }
+  @keyframes branchIn{ from{ opacity:0; } to{ opacity:.9; } }
+  #app.entered .branch svg{ animation: sway 7s ease-in-out 1.6s infinite alternate; }
+  @keyframes sway{ from{ transform: rotate(-2.2deg); } to{ transform: rotate(2.6deg); } }
+
+  /* ---------- Revelado al hacer scroll ---------- */
+  .rv, .rv-l, .rv-r, .rv-zoom{
+    opacity:0; transition: opacity .9s var(--ease), transform .9s var(--ease);
+    transition-delay: var(--d, 0s);
+  }
+  .rv{ transform: translateY(30px); }
+  .rv-l{ transform: translateX(-34px); }
+  .rv-r{ transform: translateX(34px); }
+  .rv-zoom{ transform: scale(.92); }
+  .rv.in, .rv-l.in, .rv-r.in, .rv-zoom.in{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation: none !important; transition: none !important; }
+    .gchip{ opacity:1 !important; transform:none !important; }
+    .st, .rv, .rv-l, .rv-r, .rv-zoom{ opacity:1 !important; transform:none !important; filter:none !important; }
+    .branch{ opacity:.9 !important; }
+    .hero-photo img{ opacity:1 !important; transform: scale(1.1) !important; filter:none !important; }
+    .golden path{ stroke-dashoffset:0 !important; }
+  }
+
+  /* ---------- Hero ---------- */
+  header.hero{
+    --py: 0;
+    position: relative; min-height: 100vh; min-height: 100svh;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; padding: 58px 24px 0; overflow:hidden;
+    background: #1B3324; color:#FBF6EA;
+  }
+  .hero-text{ position:relative; z-index:3; }
+
+  .hero-branch-top{ top:-30px; left:-40px; width:220px; height:220px; z-index:2; transform: translateY(calc(var(--py) * 1px)); }
+
+  /* Foto de fondo con parallax, zoom lento y fundido hacia el color del hero */
+  .hero-photo{
+    position:relative; z-index:0; flex:1 1 auto; align-self:stretch; min-height: 300px;
+    margin: -30px -24px 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40%);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 40%);
+  }
+  .hero-photo-inner{ position:absolute; inset:0; transform: translate3d(0, calc(var(--py) * 0.4px), 0); will-change: transform; }
+  .hero-photo img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position: 50% 36%;
+    opacity:0; transform: scale(1.1); transform-origin: 50% 40%;
+  }
+  #app.entered .hero-photo img{
+    animation: photoIn 2.6s var(--ease) .5s both, kenburns 26s ease-in-out 3.2s infinite alternate;
+  }
+  @keyframes photoIn{
+    from{ opacity:0; transform: scale(1.32); filter: blur(10px) brightness(1.4); }
+    to{ opacity:1; transform: scale(1.1); filter:none; }
+  }
+  @keyframes kenburns{ from{ transform: scale(1.1) translate3d(0,0,0); } to{ transform: scale(1.2) translate3d(-1.5%, -1%, 0); } }
+  .hero-photo::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(180deg, rgba(27,51,36,.35), rgba(27,51,36,.08) 55%, rgba(27,51,36,.28));
+  }
+
+  /* Pantallas anchas: texto a la izquierda y la foto a la derecha, fundida hacia el fondo */
+  @media (min-width: 900px){
+    header.hero{ justify-content:center; align-items:flex-start; padding: 70px 5% 160px; }
+    .hero-text{ width: 44%; display:flex; flex-direction:column; align-items:center; }
+    .hero-photo{
+      position:absolute; top:0; right:0; bottom:0; width: 62%; margin:0; min-height:0; flex:none;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36%);
+              mask-image: linear-gradient(to right, transparent 0, #000 36%);
+    }
+    .hero-photo img{ object-position: 56% 30%; }
+  }
+
+  /* Olas que suben y cubren la foto al hacer scroll */
+  .hero-waves{ position:absolute; left:0; right:0; bottom:-1px; height: clamp(76px, 14vw, 150px); z-index:4; pointer-events:none; }
+  .wave{ position:absolute; left:-3%; width:106%; height:100%; display:block; }
+  .wave-back{ bottom: calc(var(--py) * 0.14px); animation: waveDrift 10s ease-in-out infinite alternate; }
+  .wave-back path{ fill: var(--sage-light); opacity:.62; }
+  .wave-line{ bottom: calc(var(--py) * 0.07px); animation: waveDrift 13s ease-in-out -4s infinite alternate-reverse; }
+  .wave-line path{ fill:none; stroke: var(--gold); stroke-width:1.4; opacity:.75; vector-effect: non-scaling-stroke; }
+  .wave-front{ bottom:0; }
+  .wave-front path{ fill: var(--paper); }
+  @keyframes waveDrift{ from{ transform: translateX(-2.2%); } to{ transform: translateX(2.2%); } }
+
+  .petals{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+  .petal{
+    position:absolute; top:-6%; width:var(--s); height:calc(var(--s) * .72);
+    background: var(--c); border-radius: 80% 0 80% 0; opacity:0;
+    animation: fall var(--dur) linear var(--dl) infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes fall{
+    0%{ transform: translate3d(0,0,0) rotate(0deg); opacity:0; }
+    10%{ opacity:.75; }
+    50%{ transform: translate3d(calc(var(--dx) * .5), calc(var(--h) * .5), 0) rotate(200deg); }
+    90%{ opacity:.6; }
+    100%{ transform: translate3d(var(--dx), var(--h), 0) rotate(420deg); opacity:0; }
+  }
+  .petal.burst{ animation-iteration-count: 1; animation-fill-mode: both; }
+
+  .eyebrow-invite{ font-size: .8rem; color: var(--sage-light); letter-spacing: .34em; text-transform: uppercase; margin: 0 0 14px; }
+
+
+  .couple-names{
+    font-family:'Fraunces', serif; font-weight: 500;
+    font-size: clamp(2.6rem, 9vw, 4.4rem); line-height: 1.05; color: #FBF6EA; margin: 0;
+  }
+  .couple-names .n{ display:block; }
+  .amp{ display:block; font-style: italic; font-weight: 300; color: var(--gold); font-size: 0.5em; margin: 8px 0; }
+
+  .ornament{
+    display:flex; align-items:center; justify-content:center; gap:12px; margin: 26px auto 0; color: var(--gold);
+  }
+  .ornament i{ display:block; height:1px; width: 70px; background: linear-gradient(90deg, transparent, var(--gold)); }
+  .ornament i:last-child{ background: linear-gradient(270deg, transparent, var(--gold)); }
+  .ornament b{ width:7px; height:7px; background: var(--gold); transform: rotate(45deg); display:block; }
+
+  .wedding-date{ margin: 20px 0 0; font-size: 1.05rem; letter-spacing: 0.16em; color: #FBF6EA; }
+  .wedding-date span{ color: #D6B574; margin: 0 8px; }
+
+  .countdown-label{ margin: 0; font-size: .74rem; letter-spacing: .26em; text-transform: uppercase; color: var(--sage); }
+  .countdown{ display:flex; gap: 14px; margin-top: 14px; flex-wrap: wrap; justify-content:center; }
+  .countdown .unit{
+    background: rgba(255,255,255,0.6); border: 1px solid var(--line); border-radius: 6px;
+    padding: 14px 16px; min-width: 76px; backdrop-filter: blur(4px); box-shadow: 0 8px 20px rgba(36,64,47,.06);
+  }
+  .countdown .num{ display:block; font-family:'Fraunces', serif; font-size: 1.9rem; color: var(--forest); font-variant-numeric: tabular-nums; }
+  .countdown .num.tick{ animation: tick .45s var(--ease); }
+  @keyframes tick{ from{ opacity:.2; transform: translateY(-8px); } to{ opacity:1; transform:none; } }
+  .countdown .label{ display:block; font-size: 0.72rem; color: var(--sage); margin-top: 2px; }
+
+  .scroll-hint{
+    position:absolute !important; bottom: calc(clamp(76px, 14vw, 150px) + 10px); left:50%; margin-left:-14px; width:28px; height:28px; z-index:2;
+    color: #F6EFDC; font-size: 1.7rem; z-index:5; animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob{ 0%,100%{ transform: translateY(0); opacity:.5; } 50%{ transform: translateY(8px); opacity:1; } }
+
+  /* ---------- Secciones ---------- */
+  section.sec{ padding: 84px 0; position: relative; overflow: hidden; }
+  section.sec + section.sec::before{
+    content:""; position:absolute; top:0; left:50%; width:0; height:1px; background: var(--line);
+    transform: translateX(-50%); transition: width 1.4s var(--ease);
+  }
+  section.sec.in::before{ width: min(520px, 80%); }
+  section.alt{ background: linear-gradient(180deg, rgba(239,231,211,.55), rgba(239,231,211,.2)); }
+
+  .section-inner{ text-align:center; }
+
+  .eyebrow{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase; color:var(--sage); margin:0 0 10px; }
+
+  .card-title{ font-family:'Fraunces', serif; font-weight:500; font-size: clamp(1.7rem, 5vw, 2.2rem); color: var(--forest); margin: 0 0 14px; }
+  .card-sub{ color: var(--ink); opacity:.78; font-size:.98rem; line-height:1.7; max-width: 470px; margin: 0 auto 30px; }
+
+  .ico-wrap{
+    width: 64px; height: 64px; border-radius:50%; background:#fff; color: var(--forest);
+    display:flex; align-items:center; justify-content:center; font-size: 1.7rem;
+    box-shadow: 0 10px 24px rgba(36,64,47,.12); margin: 0 auto 16px;
+  }
+  .ico-wrap.big{ width: 84px; height: 84px; font-size: 2.2rem; animation: floaty 5s ease-in-out infinite; }
+  @keyframes floaty{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-7px); } }
+
+  /* Líneas doradas animadas */
+  .golden{
+    position:absolute; left:0; right:0; top:50%; width:100%; height:300px; margin-top:-150px;
+    pointer-events:none; z-index:0; opacity:.5;
+  }
+  .golden path{
+    fill:none; stroke: var(--gold); stroke-width:1.1;
+    stroke-dasharray:1; stroke-dashoffset:1; transition: stroke-dashoffset 3s cubic-bezier(.4,0,.2,1);
+  }
+  .golden path:nth-child(2){ stroke-opacity:.6; transition-duration:3.6s; }
+  .golden path:nth-child(3){ stroke-opacity:.4; transition-duration:4.2s; }
+  .sec.in .golden path{ stroke-dashoffset:0; }
+
+  /* Tarjetas de detalle */
+  .tiles{ display:grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 16px; text-align:center; margin: 30px 0 30px; }
+  .tile{
+    background: var(--paper-card); border:1px solid var(--line); border-radius: 10px;
+    padding: 26px 18px 22px; box-shadow: var(--shadow);
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .tile:hover{ transform: translateY(-4px); box-shadow: 0 20px 40px rgba(36,64,47,.14); }
+  .tile .ico-wrap{ width:54px; height:54px; font-size:1.4rem; margin-bottom: 12px; background: var(--paper-deep); box-shadow:none; }
+  .tile h3{ margin:0 0 6px; font-size:.7rem; letter-spacing:.24em; text-transform:uppercase; color: var(--sage); font-weight:600; }
+  .tile p{ margin:0; font-family:'Fraunces', serif; font-size:1.15rem; color: var(--forest); line-height:1.4; }
+  .tile small{ display:block; margin-top:5px; font-size:.82rem; color: var(--ink); opacity:.7; }
+
+  .map-frame{ border-radius: 12px; overflow:hidden; box-shadow: var(--shadow); border:1px solid var(--line); background: var(--paper-deep); }
+  .map-embed{ width:100%; aspect-ratio: 16/10; border:0; display:block; filter: sepia(8%) saturate(85%); }
+
+  .actions{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top: 24px; }
+  .btn{
+    font-family:'Inter', sans-serif; font-size:.85rem; letter-spacing:.02em; border-radius:6px; padding: 13px 22px;
+    cursor:pointer; text-decoration:none; border:1px solid var(--line); display:inline-flex; align-items:center; gap:8px;
+    transition: transform .2s var(--ease), background .2s, box-shadow .2s, color .2s;
+  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: 0 10px 22px rgba(36,64,47,.14); }
+  .btn.solid{ background: var(--forest); color: var(--paper); border-color: var(--forest); }
+  .btn.solid:hover{ background:#1b3324; }
+  .btn.soft{ background: var(--paper-card); color: var(--forest); }
+  .btn.soft:hover{ background: var(--sage-light); }
+  .btn.ghost{ background: transparent; color: var(--forest); }
+  .btn:disabled{ opacity:.6; cursor:default; transform:none; box-shadow:none; }
+
+  /* Dress code */
+  .dress-card{
+    background: var(--paper-card); border:1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 40px 28px 34px; position:relative; overflow:hidden;
+  }
+  .dress-card::before{
+    content:""; position:absolute; inset:-1px; border-radius: inherit; pointer-events:none;
+    background: conic-gradient(from 200deg at 50% 0%, rgba(228,87,46,.08), rgba(243,167,18,.08), rgba(90,147,103,.08), rgba(47,102,144,.08), rgba(176,85,156,.08), rgba(228,87,46,.08));
+  }
+  .dress-card > *{ position:relative; }
+  .dresscode-palette{ display:flex; gap:12px; justify-content:center; margin: 6px 0 4px; }
+  .swatch{ width: 38px; height:38px; border-radius:50%; border: 2px solid #fff; box-shadow: 0 6px 14px rgba(36,64,47,.18); transform: scale(0); transition: transform .6s cubic-bezier(.34,1.56,.64,1); }
+  .in .swatch{ transform: scale(1); }
+  .in .swatch:nth-child(1){ transition-delay:.15s; } .in .swatch:nth-child(2){ transition-delay:.25s; }
+  .in .swatch:nth-child(3){ transition-delay:.35s; } .in .swatch:nth-child(4){ transition-delay:.45s; }
+  .in .swatch:nth-child(5){ transition-delay:.55s; }
+  .looks{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 30px 0 0; text-align:center; }
+  .look{ background: rgba(255,255,255,.6); border:1px solid var(--line); border-radius: 12px; padding: 20px 16px 16px; display:flex; flex-direction:column; }
+  .look h3{ font-family:'Fraunces', serif; font-weight:500; font-size:1.3rem; color: var(--forest); margin:0 0 8px; }
+  .look p{ font-size:.88rem; line-height:1.6; margin:0 0 16px; color: var(--ink); opacity:.85; }
+  .look figure{ margin: auto 0 0; border-radius: 8px; overflow:hidden; position:relative; box-shadow: 0 10px 24px rgba(36,64,47,.14); }
+  .look figure::after{ content:""; position:absolute; inset:0; }
+  .look img{ display:block; width:100%; height:auto; transition: transform .9s var(--ease); }
+  .look:hover img{ transform: scale(1.04); }
+  .looks-note{ margin: 14px 0 0; font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color: var(--sage); }
+  @media (max-width: 640px){
+    .looks{ grid-template-columns: 1fr; }
+    .look figure{ max-width: 320px; width:100%; margin: auto auto 0; }
+  }
+
+  /* Protección básica de imágenes */
+  img{ -webkit-user-drag:none; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
+  .protect img{ pointer-events:none; }
+
+  .avoid{ margin-top: 28px; padding-top: 22px; border-top: 1px dashed var(--line); }
+  .avoid p{ margin: 0 0 12px; font-size:.78rem; letter-spacing:.2em; text-transform:uppercase; color: var(--sage); }
+  .avoid .swatch{ width:30px; height:30px; position:relative; border:1px solid var(--line); box-shadow:none; }
+  .avoid .swatch::after{ content:""; position:absolute; left:-3px; right:-3px; top:50%; height:1.5px; background:#8C2A38; transform: rotate(-42deg); }
+
+  .count-sec{ padding: 26px 0 40px; background: var(--paper); }
+  /* Invitados */
+  .guest-badge{
+    width: 76px; height:76px; border-radius:50%; background: var(--forest); color: var(--paper);
+    font-family:'Fraunces', serif; font-size: 2.2rem; display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 14px; box-shadow: 0 12px 26px rgba(36,64,47,.25);
+  }
+  .guest-title{ font-family:'Fraunces', serif; font-weight:500; letter-spacing:.14em; font-size: clamp(1.7rem, 5vw, 2.2rem); color: var(--forest); margin: 0 0 22px; }
+  .guest-list{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom: 28px; }
+  .gchip{
+    display:inline-block; background: rgba(255,255,255,.78); border:1px solid var(--line); border-radius: 8px;
+    padding: 12px 24px; font-size: 1.05rem; color: var(--ink); box-shadow: 0 8px 18px rgba(36,64,47,.07);
+    opacity:0; transform: translateY(18px) scale(.96); transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: var(--d, 0s);
+  }
+  .gchip.in{ opacity:1; transform:none; }
+  .message{
+    font-family:'Fraunces', serif; font-style: italic; font-size: clamp(1.15rem, 3vw, 1.4rem);
+    line-height: 1.6; color: var(--forest); max-width: 480px; margin: 26px auto 0;
+  }
+  .who-list{ display:grid; gap:8px; }
+  .who{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding: 12px 14px;
+    font-family:'Inter', sans-serif; font-size:.95rem; color: var(--ink); transition: border-color .2s, background .2s, transform .15s;
+  }
+  .who:hover{ border-color: var(--sage); }
+  .who:active{ transform: scale(.985); }
+  .who .box{
+    flex:none; width:22px; height:22px; border-radius:6px; border:1.5px solid var(--sage);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:.8rem; transition: background .2s, border-color .2s;
+  }
+  .who .box svg{ width:14px; height:14px; opacity:0; transition: opacity .2s; stroke-width:2.5; }
+  .who.on{ border-color: var(--forest); background: var(--paper-card); }
+  .who.on .box{ background: var(--forest); border-color: var(--forest); }
+  .who.on .box svg{ opacity:1; }
+
+  /* Música */
+  #music-toggle{
+    display:none; position:fixed; bottom: 20px; right: 20px; z-index: 30; width: 48px; height:48px; border-radius:50%;
+    border:1px solid var(--line); background: var(--paper-card); color: var(--forest); font-size: 1.3rem; cursor:pointer;
+    box-shadow: 0 8px 18px rgba(36,64,47,0.2); transition: background .2s, transform .2s;
+  }
+  #music-toggle:hover{ transform: scale(1.06); }
+  #music-toggle.visible{ display:flex; align-items:center; justify-content:center; }
+  #music-toggle.playing{ background: var(--sage-light); }
+  #music-toggle.playing::after{ content:""; position:absolute; inset:0; border-radius:50%; border:2px solid var(--sage); animation: sealRing 1.8s ease-out infinite; }
+
+  /* ---------- RSVP ---------- */
+  .rsvp-card{
+    text-align:left; background: var(--paper-card); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); padding: 30px 26px 28px; position:relative;
+  }
+  .dots{ display:flex; gap:8px; justify-content:center; margin-bottom: 22px; }
+  .dot{ width: 28px; height:4px; border-radius:4px; background: var(--line); transition: background .4s, width .4s var(--ease); }
+  .dot.active{ background: var(--gold); width: 44px; }
+
+  .step{ display:none; }
+  .step.active{ display:block; animation: stepIn .5s var(--ease) both; }
+  .step.active.back{ animation-name: stepBack; }
+  @keyframes stepIn{ from{ opacity:0; transform: translateX(28px); } to{ opacity:1; transform:none; } }
+  @keyframes stepBack{ from{ opacity:0; transform: translateX(-28px); } to{ opacity:1; transform:none; } }
+
+  .step-q{ font-family:'Fraunces', serif; font-weight:500; font-size:1.45rem; color: var(--forest); margin: 0 0 6px; text-align:center; }
+  .step-sub{ text-align:center; color: var(--ink); opacity:.7; font-size:.9rem; margin: 0 0 22px; }
+
+  .choice-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .choice{
+    position:relative; background:#fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 22px 12px 18px;
+    cursor:pointer; text-align:center; font-family:'Inter', sans-serif; color: var(--ink);
+    transition: transform .25s var(--ease), border-color .25s, background .25s, color .25s, box-shadow .25s;
+  }
+  .choice:hover{ transform: translateY(-3px); box-shadow: 0 12px 24px rgba(36,64,47,.12); border-color: var(--sage); }
+  .choice .ico{ font-size: 1.7rem; color: var(--gold); display:block; margin: 0 auto 8px; transition: color .25s, transform .4s var(--ease); }
+  .choice b{ display:block; font-size:.98rem; font-weight:600; }
+  .choice small{ display:block; margin-top:4px; font-size:.78rem; opacity:.7; }
+  .choice.selected{ background: var(--forest); border-color: var(--forest); color: var(--paper); }
+  .choice.selected .ico{ color: var(--blush); transform: scale(1.18); }
+
+  .field{ margin-bottom: 20px; }
+  .field label{ display:block; font-size: 0.82rem; color: var(--forest); margin-bottom: 8px; letter-spacing:.02em; }
+  .field .hint{ font-size:.76rem; color: var(--sage); margin-top:6px; }
+
+  input[type="text"], textarea{
+    width:100%; padding: 13px 14px; border-radius: 6px; border: 1px solid var(--line); background:#fff;
+    font-family:'Inter', sans-serif; font-size: 0.95rem; color: var(--ink); transition: border-color .2s, box-shadow .2s;
+  }
+  input[type="text"]:focus, textarea:focus{ outline:none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(176,138,78,.18); }
+  textarea{ min-height: 96px; resize: vertical; }
+  button:focus-visible, a:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .stepper{ display:flex; align-items:center; justify-content:center; gap: 18px; background:#fff; border:1px solid var(--line); border-radius: 10px; padding: 10px; }
+  .stepper button{
+    width: 42px; height:42px; border-radius:50%; border:1px solid var(--line); background: var(--paper-card);
+    font-size:1.3rem; color: var(--forest); cursor:pointer; transition: background .2s, transform .15s;
+  }
+  .stepper button:hover{ background: var(--sage-light); }
+  .stepper button:active{ transform: scale(.92); }
+  .stepper output{ min-width: 40px; text-align:center; font-family:'Fraunces', serif; font-size:1.8rem; color: var(--forest); }
+
+  .summary{ list-style:none; margin: 6px 0 22px; padding: 14px 16px; background: var(--paper-deep); border-radius: 8px; display:grid; gap:8px; }
+  .summary:empty{ display:none; }
+  .summary li{ display:flex; justify-content:space-between; gap:14px; font-size:.86rem; }
+  .summary li b{ color: var(--forest); font-weight:600; }
+  .summary li span{ text-align:right; color: var(--ink); opacity:.85; }
+
+  .step-nav{ display:flex; gap: 10px; justify-content:space-between; margin-top: 8px; }
+  .step-nav .btn{ flex:1; justify-content:center; }
+
+  .form-note{ font-size: 0.8rem; color: var(--sage); margin: 14px 0 0; text-align:center; }
+
+  .result{ display:none; text-align:center; padding: 18px 8px 10px; }
+  .result.show{ display:block; }
+  .result p{ font-family:'Fraunces', serif; font-size: 1.3rem; color: var(--forest); margin: 14px 0 6px; line-height:1.5; }
+  .result small{ color: var(--sage); font-size:.84rem; }
+  .check-anim{ width:78px; height:78px; display:block; margin: 0 auto; }
+  .check-anim circle, .check-anim path{ fill:none; stroke: var(--sage); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1; }
+  .check-anim path{ stroke: var(--gold); }
+  .result.show .check-anim circle{ animation: draw .9s .05s var(--ease) forwards; }
+  .result.show .check-anim path{ animation: draw .6s .7s var(--ease) forwards; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  .result p.who-confirmed{ font-family:'Inter', sans-serif; font-size:.92rem; color: var(--ink); opacity:.8; margin: 4px 0 6px; line-height:1.5; }
+  .who-confirmed:empty{ display:none; }
+  .rsvp-error{ display:none; text-align:center; color:#8C2A38; font-size:.9rem; margin-top: 14px; }
+  .rsvp-error.show{ display:block; }
+
+  footer{ text-align:center; padding: 70px 24px 90px; position:relative; }
+  footer .sig{ font-family:'Fraunces', serif; font-style: italic; font-size: 1.35rem; color: var(--forest); margin: 18px 0 8px; line-height:1.5; }
+  footer .small{ font-size:.78rem; letter-spacing:.2em; color: var(--sage); text-transform:uppercase; }
+
+  @media (max-width: 480px){
+    section.sec{ padding: 68px 0; }
+    .countdown{ gap: 8px; }
+    .countdown .unit{ min-width: 66px; padding: 12px 10px; }
+    .envelope{ --w: clamp(240px, min(80vw, 46vh), 320px); }
+    .rsvp-card{ padding: 26px 18px 24px; }
+    .choice-grid{ gap: 10px; }
+    .dress-card{ padding: 32px 18px 28px; }
+    .hero-branch-top{ width:170px; height:170px; }
+      .tiles{ grid-template-columns: 1fr; gap: 12px; }
+    .tile{
+      display:grid; grid-template-columns: 54px 1fr; column-gap: 16px; align-items:center;
+      text-align:left; padding: 16px 18px;
+    }
+    .tile .ico-wrap{ grid-row: 1 / span 3; margin: 0; }
+    .tile h3{ margin-bottom: 2px; }
+    .tile small{ margin-top: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Íconos de línea reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="insignia" viewBox="0 0 1600 1600"><path fill="currentColor" fill-rule="evenodd" d="M807.5,1352.4C734.5,1344.7 680.8,1306.1 664.8,1249.5C659.3,1230.2 658.3,1197.4 662.5,1177.5C668.6,1149.3 673.0,1139.4 685.3,1126.4C698.2,1112.7 712.9,1103.2 723.8,1101.5C729.4,1100.6 729.2,1101.9 722.8,1106.7C719.9,1108.9 714.0,1113.3 709.7,1116.5C682.7,1136.8 671.4,1159.2 670.3,1194.6C669.2,1229.3 680.0,1256.1 705.5,1281.5C754.8,1330.8 837.9,1343.3 906.2,1311.7C945.0,1293.8 984.3,1256.9 1017.2,1207.5C1032.6,1184.3 1059.8,1133.4 1057.7,1131.4C1056.7,1130.4 1009.0,1130.8 1001.2,1131.9C978.2,1135.2 964.4,1141.3 952.9,1153.1C945.2,1161.0 943.4,1162.0 941.2,1159.8C939.4,1158.0 939.7,1155.5 942.6,1149.7C956.0,1123.1 982.1,1108.0 1014.8,1108.0C1024.3,1108.0 1047.6,1109.8 1060.9,1111.6L1065.6,1112.2L1071.9,1097.8C1087.7,1062.4 1118.9,1006.5 1134.1,986.3C1136.2,983.4 1138.0,980.9 1138.0,980.6C1138.0,979.4 1099.3,962.0 1080.0,954.5C1014.2,928.8 965.5,923.9 920.8,938.4C869.1,955.2 830.5,999.0 832.2,1039.0C832.9,1055.3 838.6,1063.7 853.3,1070.5C877.4,1081.6 899.9,1079.9 925.4,1065.1C940.4,1056.3 950.7,1045.0 952.1,1035.6C953.1,1029.9 955.7,1025.6 958.7,1025.2C961.6,1024.8 962.0,1026.7 960.3,1033.0C953.1,1061.6 928.6,1081.8 894.2,1087.5C867.5,1092.0 845.3,1085.2 826.9,1067.0C813.6,1053.8 809.4,1042.0 810.3,1019.5C811.3,991.8 820.8,972.0 844.4,948.5C877.4,915.6 918.2,901.5 968.2,905.9C1012.5,909.7 1084.6,935.6 1134.4,965.4L1145.3,971.9L1151.1,966.6C1167.4,951.5 1192.1,950.7 1196.0,965.1C1197.9,972.0 1195.2,974.2 1189.6,970.3C1182.4,965.1 1171.6,966.7 1161.3,974.6C1157.2,977.7 1157.2,978.2 1161.2,979.9C1163.0,980.7 1167.8,982.9 1171.7,984.7C1191.2,993.7 1228.9,1006.1 1251.7,1011.1C1263.8,1013.7 1289.7,1014.8 1298.1,1013.1C1310.7,1010.5 1318.5,1005.0 1323.4,995.1C1328.0,986.1 1332.0,984.8 1332.0,992.3C1332.0,1010.2 1319.2,1024.1 1297.7,1029.7C1272.6,1036.2 1220.3,1022.2 1163.7,993.8C1152.1,988.0 1149.6,987.1 1148.7,988.3C1129.0,1012.4 1112.6,1043.3 1090.9,1096.9C1086.6,1107.6 1083.2,1116.5 1083.3,1116.7C1085.3,1118.6 1116.6,1120.4 1150.0,1120.5C1170.6,1120.5 1188.1,1120.9 1188.8,1121.3C1191.3,1122.9 1190.1,1125.9 1186.1,1128.0C1176.7,1132.8 1135.9,1135.4 1096.0,1133.9C1085.3,1133.4 1076.5,1133.2 1076.4,1133.3C1076.4,1133.4 1073.5,1140.9 1070.0,1150.0C1052.2,1196.9 1030.2,1239.6 1012.0,1262.4C971.9,1312.9 926.0,1340.5 866.5,1350.1C853.9,1352.1 818.1,1353.5 807.5,1352.4ZM744.5,942.9C729.7,940.7 717.8,933.5 712.8,923.6C704.9,908.2 716.1,876.3 735.0,860.0C748.5,848.4 773.8,835.4 795.0,829.2C796.9,828.6 803.0,826.8 808.5,825.2C814.0,823.5 833.4,818.5 851.5,814.0C869.6,809.5 885.3,805.3 886.3,804.8C891.0,802.3 909.5,757.2 923.5,713.8C926.5,704.4 929.0,696.2 929.0,695.6C929.0,695.1 924.3,702.4 918.5,711.9C884.7,767.6 864.6,785.6 838.0,783.7C823.4,782.7 815.1,776.8 810.9,764.3C806.7,751.5 809.7,737.7 822.1,712.8L826.9,703.2L824.5,702.6C822.7,702.1 822.0,701.3 822.0,699.5C822.0,697.2 858.1,624.7 862.2,618.8C866.2,613.1 870.7,612.0 891.1,612.1L909.5,612.1L905.5,615.3C894.7,623.9 890.8,629.9 872.2,666.0C860.7,688.2 843.9,723.5 840.7,732.0C831.7,756.0 835.1,773.3 848.8,773.3C867.1,773.3 903.6,723.8 944.8,643.0C961.1,611.0 959.8,612.0 984.5,612.0L1001.0,612.0L994.3,618.4C985.8,626.4 979.6,636.6 972.0,654.7C963.9,674.2 958.7,688.8 938.3,748.0C932.6,764.8 926.8,781.6 925.5,785.4C924.1,789.3 923.2,792.6 923.5,792.8C925.4,794.7 955.8,780.2 966.5,772.3C987.5,756.8 997.0,743.8 1022.8,696.0C1029.9,683.0 1032.6,680.5 1034.9,684.8C1036.4,687.6 1034.6,692.1 1024.1,712.5C996.0,767.1 976.4,785.8 928.0,804.5C921.1,807.2 915.0,809.7 914.4,810.2C913.8,810.6 910.0,816.7 906.0,823.6C902.1,830.5 893.9,843.4 888.0,852.3C848.1,911.8 811.5,939.0 766.0,943.0C753.1,944.1 752.9,944.1 744.5,942.9ZM763.5,930.8C786.3,924.2 814.1,902.2 845.4,866.0C860.4,848.7 877.0,825.8 877.0,822.5C877.0,820.5 815.4,837.4 787.7,847.0C755.6,858.0 737.3,872.9 726.3,896.8C720.5,909.3 720.5,919.0 726.2,925.5C733.6,934.0 746.4,935.8 763.5,930.8ZM1048.5,587.4C1011.3,581.7 990.1,563.1 984.6,531.5C978.5,496.5 990.3,453.3 1030.8,363.0C1034.6,354.5 1042.1,337.8 1047.5,326.0C1067.4,282.1 1072.3,260.6 1064.4,252.7C1045.6,233.9 979.9,295.1 918.8,388.0C881.2,445.4 855.9,487.4 841.4,516.6C827.8,544.0 822.7,549.9 810.9,551.3C802.0,552.5 795.8,549.4 793.9,542.9C792.8,539.4 793.0,538.7 797.2,531.3C837.1,461.8 863.6,392.3 877.9,320.0C885.9,279.5 888.3,246.9 883.9,238.5C876.0,223.4 862.3,221.9 844.1,234.1C817.6,251.8 750.3,347.4 715.7,416.5C704.9,438.1 690.4,469.7 656.2,545.5C648.9,561.6 643.8,565.3 628.8,565.4C621.0,565.5 619.9,565.3 617.6,563.1C614.1,559.8 614.3,557.0 618.9,549.7C655.2,491.2 708.8,354.9 723.4,284.0C736.5,220.0 724.9,183.0 689.5,175.5C643.5,165.8 561.1,212.7 511.3,277.0C487.4,307.9 473.7,339.5 468.4,376.0C464.1,406.0 473.3,439.2 490.3,454.7C525.9,487.4 578.3,475.4 610.3,427.4C635.0,390.3 638.2,355.5 618.0,344.5C612.7,341.6 612.0,341.5 599.3,341.4C585.3,341.4 582.6,340.6 583.2,336.6C583.6,333.8 590.1,332.0 602.6,331.3C630.6,329.7 646.0,345.7 646.2,376.2C646.2,388.0 644.7,393.8 637.5,408.2C620.9,441.7 590.6,467.5 554.0,479.5C540.8,483.9 520.4,483.7 507.3,479.2C434.5,454.3 421.6,370.9 477.4,287.0C514.5,231.2 586.5,180.8 647.5,167.9C663.5,164.5 691.9,164.4 703.3,167.8C736.3,177.3 752.5,202.2 753.7,245.0C754.5,273.0 749.0,301.1 734.9,341.9C727.0,364.6 725.6,371.4 728.6,370.8C729.7,370.6 732.4,367.3 735.0,362.7C775.2,292.7 809.2,246.9 832.0,231.6C867.5,207.8 898.2,208.9 909.5,234.4C920.5,259.4 910.4,315.2 876.0,417.4C872.7,427.3 870.2,435.5 870.3,435.7C870.5,435.8 876.9,426.7 884.5,415.3C914.6,370.7 958.0,314.0 983.6,285.9C1004.1,263.4 1025.3,245.8 1043.0,236.6C1080.1,217.3 1100.7,226.9 1098.7,262.5C1097.7,279.2 1091.6,296.4 1074.2,331.5C1046.0,388.5 1028.2,435.3 1016.1,484.0C1007.5,519.2 1010.5,553.4 1023.5,567.8C1031.3,576.5 1044.2,581.0 1061.0,581.0C1071.6,581.0 1074.6,582.2 1071.2,585.2C1067.1,588.9 1061.8,589.4 1048.5,587.4Z"/><path fill="#B08A4E" fill-rule="evenodd" d="M797.0,1452.6C796.2,1451.3 793.9,1447.9 792.0,1444.9C784.4,1433.2 784.8,1424.6 794.0,1394.0C796.1,1387.0 796.8,1379.3 795.0,1382.0C794.4,1382.8 792.9,1387.0 791.5,1391.4C790.1,1395.7 788.3,1400.2 787.5,1401.3C786.7,1402.5 786.0,1404.7 786.0,1406.2C786.0,1412.3 775.4,1420.0 766.8,1420.0C755.1,1420.0 754.2,1404.6 765.8,1401.4C776.1,1398.6 790.1,1383.3 793.1,1371.7C793.7,1369.1 794.6,1367.0 795.0,1367.0C796.1,1367.0 798.0,1359.7 798.0,1355.6C798.0,1352.2 798.2,1351.9 800.2,1352.6C803.3,1353.5 803.2,1353.4 804.1,1358.2C808.0,1379.6 822.8,1401.0 833.6,1401.0C836.5,1401.0 843.0,1405.8 844.1,1408.8C847.1,1416.5 837.0,1422.6 827.7,1418.6C822.6,1416.4 814.0,1405.9 814.0,1401.8C814.0,1400.8 813.1,1398.0 811.9,1395.7C810.8,1393.4 809.1,1389.2 808.2,1386.5C807.3,1383.6 806.5,1382.2 806.3,1383.2C805.7,1385.6 808.7,1401.2 811.0,1407.9C815.7,1421.7 815.5,1431.2 810.5,1441.6C809.1,1444.4 808.0,1446.9 808.0,1447.2C808.0,1448.5 801.2,1455.0 799.9,1455.0C799.1,1455.0 797.8,1453.9 797.0,1452.6ZM800.1,1441.8C800.2,1441.1 800.2,1439.6 800.2,1438.5C800.1,1436.8 800.2,1436.8 800.6,1438.2C801.6,1441.5 804.8,1440.3 805.9,1436.2C807.7,1429.9 807.3,1425.1 804.3,1417.0C804.0,1416.2 803.7,1414.6 803.6,1413.5C803.5,1412.4 803.0,1411.5 802.3,1411.5C801.7,1411.5 800.8,1411.2 800.4,1410.7C798.7,1409.1 794.0,1421.3 794.0,1427.3C794.0,1434.6 799.6,1447.8 800.1,1441.8ZM871.2,1414.3C867.0,1412.6 871.8,1409.0 878.2,1409.0C887.4,1409.0 923.6,1403.7 949.3,1398.5C963.6,1395.6 970.1,1394.0 979.5,1390.9C982.8,1389.9 988.9,1388.1 993.0,1386.9C1003.5,1384.1 1016.2,1380.1 1018.3,1378.9C1019.3,1378.3 1024.1,1376.6 1029.0,1375.0C1033.9,1373.4 1040.8,1370.7 1044.4,1369.1C1048.0,1367.4 1051.2,1366.0 1051.6,1366.0C1052.6,1366.0 1072.8,1357.2 1079.5,1353.9C1095.0,1346.1 1116.7,1334.6 1118.0,1333.4C1118.9,1332.7 1121.8,1331.1 1124.4,1329.9C1128.5,1328.1 1133.8,1324.6 1140.0,1319.7C1140.8,1319.0 1143.3,1317.5 1145.5,1316.4C1149.0,1314.6 1152.6,1312.1 1166.0,1302.5C1167.5,1301.4 1172.3,1298.1 1176.6,1295.1C1184.8,1289.5 1189.1,1286.3 1192.5,1283.2C1193.6,1282.1 1196.1,1280.3 1198.0,1278.9C1199.9,1277.6 1202.0,1276.0 1202.5,1275.3C1203.0,1274.6 1205.6,1272.3 1208.2,1270.2C1223.2,1258.4 1238.8,1243.4 1263.3,1217.5C1280.6,1199.1 1301.6,1172.2 1313.4,1153.1C1314.9,1150.6 1316.6,1148.3 1317.0,1148.0C1318.2,1147.3 1329.9,1129.6 1333.6,1123.0C1335.3,1120.0 1338.7,1113.9 1341.0,1109.5C1343.4,1105.1 1346.1,1100.6 1347.0,1099.5C1348.6,1097.8 1354.0,1086.8 1354.0,1085.5C1354.0,1085.2 1355.8,1082.0 1358.0,1078.4C1360.2,1074.8 1362.0,1071.6 1362.0,1071.4C1362.0,1070.7 1374.3,1043.5 1375.0,1042.5C1375.4,1042.0 1376.1,1040.1 1376.5,1038.3C1377.1,1035.3 1379.8,1028.8 1382.1,1024.6C1382.7,1023.5 1384.5,1019.0 1386.0,1014.6C1387.5,1010.1 1390.5,1001.8 1392.5,996.0C1396.4,985.0 1402.0,966.7 1402.0,965.1C1402.0,964.6 1402.5,962.9 1403.2,961.3C1403.8,959.8 1405.1,955.1 1406.1,951.0C1407.0,946.9 1409.0,938.8 1410.4,933.0C1430.2,852.5 1435.3,738.7 1422.5,664.5C1421.8,660.1 1420.9,654.0 1420.5,651.0C1419.9,645.5 1418.0,635.8 1413.9,618.0C1406.8,586.7 1406.8,586.4 1396.9,555.2C1394.8,548.4 1393.0,542.4 1393.0,541.9C1393.0,541.3 1391.9,538.4 1390.5,535.4C1389.1,532.4 1388.0,529.6 1388.0,529.3C1388.0,528.9 1386.5,524.7 1384.6,520.0C1382.7,515.3 1380.2,508.8 1379.0,505.5C1376.6,499.1 1375.5,496.6 1366.4,477.0C1355.9,454.3 1334.4,415.7 1326.8,405.9C1325.3,403.9 1324.0,402.0 1324.0,401.7C1324.0,401.4 1322.1,398.4 1319.8,395.0C1317.4,391.6 1314.2,386.7 1312.5,384.1C1310.8,381.5 1308.4,377.9 1307.0,376.2C1305.6,374.5 1302.5,370.3 1300.0,367.0C1294.7,359.8 1271.2,331.2 1266.1,325.6C1254.0,312.5 1222.5,281.8 1211.5,272.3C1204.3,266.2 1197.4,260.0 1196.0,258.7C1194.6,257.4 1191.0,254.6 1188.0,252.5C1185.0,250.3 1180.7,247.0 1178.5,245.1C1176.2,243.1 1171.8,239.7 1168.6,237.5C1165.4,235.3 1161.6,232.5 1160.2,231.4C1155.6,227.8 1135.7,214.6 1132.8,213.3C1131.3,212.7 1129.0,211.2 1127.8,210.0C1126.5,208.8 1124.2,207.2 1122.5,206.4C1120.8,205.6 1117.2,203.6 1114.5,201.9C1099.6,192.5 1060.9,173.3 1043.3,166.6C1038.3,164.7 1032.3,162.2 1029.9,161.0C1027.6,159.8 1022.0,157.5 1017.6,156.0C1013.1,154.5 1006.8,152.4 1003.5,151.2C971.7,140.4 928.7,129.7 901.5,125.9C898.2,125.5 893.2,124.7 890.5,124.1C887.8,123.6 882.6,123.1 879.0,123.1C870.9,123.0 866.9,119.7 871.8,117.1C876.3,114.7 942.6,126.7 970.5,135.0C993.7,141.9 1022.6,151.8 1035.0,157.0C1044.2,160.8 1052.9,164.0 1054.4,164.0C1055.2,164.0 1056.2,164.4 1056.5,165.0C1056.8,165.5 1068.2,171.5 1081.8,178.4C1107.9,191.5 1116.3,195.9 1122.0,199.5C1138.3,209.9 1144.2,213.7 1148.5,216.6C1151.3,218.5 1154.2,220.0 1155.0,220.0C1155.8,220.0 1157.1,220.9 1157.7,221.9C1158.4,222.9 1162.2,226.0 1166.2,228.6C1172.7,232.9 1181.6,239.5 1183.0,241.1C1183.3,241.4 1185.3,242.9 1187.5,244.5C1189.7,246.1 1193.4,249.0 1195.7,251.0C1198.0,252.9 1201.7,255.8 1203.9,257.5C1208.7,261.1 1211.1,263.3 1234.9,286.0C1253.5,303.7 1254.7,304.9 1256.5,307.2C1257.0,308.0 1259.2,310.5 1261.3,312.8C1264.3,316.2 1264.9,317.5 1264.0,318.5C1263.2,319.4 1263.2,320.0 1264.0,320.5C1264.9,321.1 1265.4,320.4 1265.1,318.8C1264.9,317.3 1266.3,318.0 1268.8,320.7C1274.3,326.6 1286.6,340.8 1289.0,344.0C1293.6,350.2 1302.1,360.0 1302.9,360.0C1303.3,360.0 1304.2,361.2 1304.9,362.6C1305.5,364.1 1307.6,367.1 1309.4,369.4C1311.2,371.6 1313.4,374.7 1314.1,376.1C1315.4,378.6 1316.4,380.2 1325.3,393.5C1327.5,396.8 1331.6,402.9 1334.3,407.0C1337.0,411.1 1340.1,415.7 1341.0,417.1C1342.0,418.5 1344.9,423.9 1347.5,429.1C1350.1,434.3 1352.8,439.2 1353.5,440.0C1355.0,441.7 1357.0,445.3 1365.8,462.2C1369.2,468.7 1372.0,474.4 1372.0,475.1C1372.0,476.3 1380.5,493.7 1382.0,495.5C1382.4,496.0 1383.5,499.0 1384.3,502.0C1385.8,507.8 1388.6,515.1 1391.3,521.0C1393.3,525.4 1400.9,547.2 1402.1,552.5C1402.7,554.6 1403.7,557.8 1404.4,559.5C1405.2,561.1 1406.8,566.3 1408.0,571.0C1409.2,575.7 1411.0,582.0 1412.0,585.0C1413.0,588.0 1414.3,593.2 1415.0,596.5C1418.1,612.1 1419.3,617.7 1420.2,620.5C1420.7,622.1 1421.8,627.1 1422.5,631.5C1426.2,652.4 1428.1,662.7 1429.0,664.5C1429.5,665.6 1430.2,670.5 1430.5,675.5C1430.9,680.5 1431.6,689.7 1432.0,696.0C1432.5,702.3 1433.3,713.4 1433.9,720.5C1435.1,737.5 1435.2,799.9 1434.0,816.5C1431.5,849.9 1429.9,863.5 1425.5,886.5C1424.7,890.9 1423.3,898.8 1422.5,904.0C1421.7,909.2 1420.7,914.2 1420.4,915.0C1420.1,915.8 1419.4,919.0 1419.0,922.0C1418.5,925.0 1417.2,930.9 1416.0,935.0C1414.8,939.1 1413.3,945.2 1412.6,948.5C1411.9,951.8 1410.4,957.4 1409.3,961.0C1408.1,964.6 1406.2,970.9 1404.9,975.0C1403.7,979.1 1401.1,987.2 1399.2,993.0C1397.3,998.8 1395.4,1004.9 1395.0,1006.5C1394.5,1008.1 1393.2,1012.0 1392.0,1015.0C1390.8,1018.0 1388.3,1024.7 1386.5,1029.8C1384.6,1034.9 1381.1,1043.2 1378.7,1048.3C1376.2,1053.3 1373.4,1059.5 1372.4,1062.0C1368.3,1071.8 1352.1,1102.8 1342.4,1119.5C1341.4,1121.2 1339.2,1125.0 1337.4,1128.0C1335.7,1131.0 1332.0,1136.7 1329.4,1140.6C1326.7,1144.5 1320.9,1152.9 1316.6,1159.4C1312.3,1165.8 1308.3,1171.0 1307.9,1171.0C1307.5,1171.0 1306.3,1172.6 1305.4,1174.5C1304.5,1176.5 1301.9,1180.2 1299.6,1182.8C1297.3,1185.4 1294.1,1189.3 1292.5,1191.5C1290.9,1193.7 1288.9,1196.3 1288.0,1197.4C1282.0,1204.9 1278.0,1209.5 1271.8,1216.3C1267.9,1220.6 1263.7,1225.3 1262.6,1226.9C1261.4,1228.4 1258.1,1231.9 1255.1,1234.6C1252.1,1237.3 1246.7,1242.6 1243.1,1246.5C1235.3,1254.7 1233.2,1256.7 1229.0,1260.0C1227.3,1261.4 1223.7,1264.5 1221.1,1267.0C1213.4,1274.3 1208.7,1278.4 1205.6,1280.3C1204.0,1281.4 1201.8,1283.3 1200.7,1284.6C1199.7,1285.9 1198.4,1287.0 1197.9,1287.0C1196.2,1287.0 1187.6,1293.8 1179.8,1301.2C1178.2,1302.8 1176.5,1304.0 1175.9,1304.0C1175.3,1304.0 1165.7,1310.1 1154.5,1317.5C1143.3,1324.9 1133.3,1331.3 1132.3,1331.7C1131.3,1332.1 1130.3,1332.7 1130.0,1333.1C1129.0,1334.6 1109.1,1345.2 1077.7,1361.1C1073.8,1363.1 1068.9,1364.3 1069.2,1363.3C1069.4,1362.8 1069.2,1362.4 1068.8,1362.2C1067.1,1361.7 1066.8,1362.1 1067.9,1363.4C1068.9,1364.6 1050.6,1374.0 1047.2,1374.0C1046.6,1374.0 1032.9,1379.3 1022.5,1383.5C1017.2,1385.7 990.3,1394.0 988.6,1394.0C988.3,1394.0 988.1,1393.4 988.3,1392.8C988.4,1392.0 987.3,1391.5 985.2,1391.5C981.1,1391.5 980.6,1393.3 984.6,1394.0C987.1,1394.5 986.6,1394.8 980.5,1396.4C976.6,1397.4 969.9,1399.3 965.5,1400.5C956.9,1403.0 941.0,1406.3 926.7,1408.6C921.8,1409.3 917.4,1410.2 916.9,1410.6C916.0,1411.1 877.4,1415.0 874.0,1414.9C873.2,1414.9 871.9,1414.6 871.2,1414.3ZM775.6,1410.8C778.9,1407.1 783.3,1400.0 782.7,1399.3C782.1,1398.8 773.7,1404.4 772.0,1406.5C771.3,1407.3 770.2,1408.0 769.5,1408.0C767.2,1408.0 765.6,1410.8 767.0,1412.5C769.0,1414.9 772.5,1414.2 775.6,1410.8ZM833.9,1412.6C835.4,1410.8 834.3,1408.2 831.1,1406.5C829.7,1405.8 827.3,1404.0 825.8,1402.6C822.5,1399.4 820.9,1399.3 821.4,1402.2C821.7,1403.5 821.9,1404.8 821.9,1405.2C822.4,1409.2 831.9,1415.1 833.9,1412.6ZM711.0,1408.8C706.3,1407.8 700.5,1406.5 698.0,1406.1C681.6,1403.1 674.8,1401.6 670.0,1400.0C660.2,1396.9 653.7,1395.1 646.5,1393.6C638.3,1391.9 630.9,1389.5 616.1,1384.1C610.3,1381.9 599.2,1377.8 591.5,1375.0C583.8,1372.2 576.1,1369.3 574.5,1368.5C572.9,1367.8 568.1,1365.8 564.0,1364.0C559.9,1362.3 555.6,1360.3 554.5,1359.6C553.4,1358.9 550.0,1357.5 547.0,1356.5C544.0,1355.6 538.4,1352.9 534.5,1350.5C530.6,1348.2 524.4,1344.8 520.5,1343.0C516.6,1341.1 510.4,1337.8 506.5,1335.5C502.6,1333.3 495.1,1329.2 489.8,1326.6C479.7,1321.6 476.5,1318.6 478.1,1315.7C479.4,1313.5 484.6,1315.3 492.4,1320.9C495.7,1323.1 498.9,1325.0 499.5,1325.0C500.2,1325.0 502.0,1326.0 503.5,1327.2C506.4,1329.4 522.0,1338.0 528.0,1340.5C529.9,1341.4 533.3,1342.9 535.5,1344.0C566.2,1358.8 573.0,1362.0 575.5,1362.6C577.2,1363.0 580.2,1364.1 582.2,1365.1C584.2,1366.2 589.2,1368.1 593.2,1369.4C600.9,1372.0 611.5,1375.9 616.4,1377.9C619.4,1379.1 641.7,1386.3 645.5,1387.3C646.6,1387.6 651.3,1388.9 656.0,1390.3C665.1,1392.9 675.3,1395.2 699.0,1400.1C730.4,1406.6 731.6,1407.0 730.7,1409.5C729.8,1411.6 721.9,1411.3 711.0,1408.8ZM845.0,1396.0C834.0,1393.9 817.0,1380.4 817.0,1373.8C817.0,1371.6 820.8,1373.5 824.4,1377.4C836.2,1389.9 858.3,1391.6 863.6,1380.4C866.5,1374.2 859.6,1372.2 847.0,1375.5C843.2,1376.5 838.8,1376.1 837.0,1374.5C836.2,1373.8 834.2,1372.8 832.7,1372.5C831.1,1372.1 828.2,1370.2 826.2,1368.2C824.2,1366.3 820.8,1363.7 818.8,1362.4C816.8,1361.1 814.9,1359.2 814.5,1358.0C814.2,1356.9 813.4,1356.0 812.9,1356.0C812.4,1356.0 812.0,1355.5 812.0,1355.0C812.0,1354.4 817.2,1354.0 825.5,1354.0C840.5,1354.0 841.1,1354.3 835.5,1359.6C831.0,1363.9 831.0,1364.2 837.2,1366.4C844.3,1369.0 845.6,1369.1 852.3,1367.4C866.5,1364.0 872.3,1367.7 870.9,1379.2C869.7,1389.8 856.7,1398.2 845.0,1396.0ZM743.5,1394.1C722.6,1384.6 726.7,1360.6 748.1,1367.6C750.9,1368.5 754.2,1369.0 755.8,1368.6C758.3,1368.0 759.8,1367.7 766.1,1366.4C769.4,1365.8 770.5,1362.5 768.1,1360.7C764.6,1358.2 762.6,1351.0 765.0,1349.5C765.5,1349.2 768.1,1349.6 770.7,1350.5C774.3,1351.7 777.2,1351.9 783.2,1351.4C790.7,1350.8 791.0,1350.8 791.0,1352.8C791.0,1355.8 788.8,1360.1 787.6,1359.7C787.0,1359.4 785.4,1360.3 784.0,1361.5C782.6,1362.8 780.1,1364.6 778.4,1365.7C776.7,1366.7 772.9,1369.1 769.9,1371.1C763.1,1375.6 758.9,1376.4 749.2,1375.0C742.3,1373.9 741.5,1374.0 740.3,1375.6C735.1,1382.7 748.6,1390.5 760.2,1387.1C768.9,1384.5 770.6,1383.4 777.7,1376.7C785.5,1369.2 787.9,1369.7 782.1,1377.6C771.0,1392.7 755.1,1399.4 743.5,1394.1ZM892.2,1392.7C886.9,1387.1 893.4,1379.6 900.6,1382.9C906.0,1385.3 939.8,1380.4 961.5,1374.0C967.8,1372.1 975.9,1370.0 985.7,1367.6C991.3,1366.2 997.8,1364.2 1000.2,1363.2C1002.6,1362.1 1006.8,1360.5 1009.5,1359.6C1017.9,1357.0 1026.3,1354.0 1029.5,1352.6C1031.2,1351.8 1036.5,1349.5 1041.5,1347.5C1062.6,1338.9 1082.9,1329.3 1094.8,1322.3C1098.8,1319.9 1102.2,1318.0 1102.4,1318.0C1102.7,1318.0 1116.2,1310.3 1120.0,1307.9C1121.4,1307.0 1126.5,1303.9 1131.5,1301.0C1141.9,1294.8 1170.0,1275.1 1170.0,1273.9C1170.0,1273.5 1171.0,1272.8 1172.1,1272.5C1173.3,1272.1 1178.4,1268.4 1183.4,1264.1C1188.4,1259.9 1195.9,1253.8 1200.0,1250.6C1212.3,1240.8 1253.2,1198.9 1264.0,1185.0C1269.3,1178.1 1274.7,1171.6 1275.9,1170.6C1277.0,1169.6 1279.2,1166.7 1280.7,1164.2C1283.4,1159.5 1287.5,1153.7 1293.0,1146.5C1294.8,1144.3 1298.4,1138.9 1301.2,1134.5C1304.0,1130.1 1307.8,1124.2 1309.7,1121.4C1311.5,1118.6 1313.0,1116.0 1313.0,1115.7C1313.0,1115.3 1314.3,1113.1 1315.9,1110.8C1320.4,1104.0 1328.0,1091.0 1328.0,1090.1C1328.0,1089.7 1329.7,1086.2 1331.7,1082.4C1338.8,1069.0 1349.3,1047.4 1351.6,1041.2C1353.0,1037.7 1355.2,1032.6 1356.6,1029.8C1358.0,1027.0 1360.0,1022.0 1361.1,1018.7C1362.2,1015.4 1363.4,1012.2 1363.9,1011.6C1365.1,1010.1 1372.0,989.6 1372.0,987.5C1372.0,986.6 1372.7,984.6 1373.5,983.2C1377.1,976.8 1390.6,927.5 1393.1,912.0C1393.9,907.0 1395.4,898.7 1398.1,885.5C1401.7,867.7 1404.1,846.2 1407.0,805.0C1409.1,776.4 1407.6,724.3 1403.9,691.5C1403.4,686.5 1402.7,680.2 1402.5,677.5C1402.1,671.3 1396.5,636.8 1394.5,628.0C1393.7,624.4 1391.9,616.8 1390.5,611.0C1389.0,605.2 1387.4,598.5 1386.9,596.0C1386.4,593.5 1385.1,588.8 1384.1,585.5C1383.0,582.2 1380.8,574.8 1379.0,569.0C1377.3,563.2 1375.3,556.7 1374.5,554.5C1373.8,552.3 1372.4,547.8 1371.4,544.5C1370.4,541.2 1368.8,537.1 1367.8,535.5C1366.8,533.9 1366.0,531.5 1366.0,530.3C1366.0,529.1 1365.6,527.9 1365.1,527.6C1364.6,527.3 1363.9,525.8 1363.6,524.4C1362.6,520.7 1353.0,497.9 1348.8,489.4C1346.9,485.6 1342.8,477.3 1339.6,471.0C1336.5,464.7 1333.6,458.8 1333.1,458.0C1332.6,457.2 1330.7,453.6 1329.0,450.0C1327.2,446.4 1324.4,441.7 1322.9,439.6C1321.3,437.4 1320.0,435.2 1320.0,434.7C1320.0,434.2 1318.4,431.9 1316.5,429.6C1314.6,427.2 1313.0,424.7 1313.0,424.0C1313.0,423.4 1312.0,421.5 1310.8,420.0C1309.5,418.5 1307.3,415.0 1305.7,412.4C1304.2,409.7 1301.5,405.5 1299.6,403.0C1297.7,400.5 1296.1,398.1 1296.1,397.7C1296.0,396.7 1287.4,384.3 1280.4,375.0C1275.3,368.2 1272.9,365.2 1257.1,346.6C1245.9,333.4 1201.0,288.6 1196.9,286.5C1195.4,285.7 1193.7,284.4 1193.3,283.6C1192.9,282.9 1186.4,277.5 1179.0,271.7C1171.6,265.8 1163.7,259.6 1161.5,257.8C1159.3,255.9 1155.7,253.3 1153.5,251.9C1151.3,250.5 1146.9,247.5 1143.7,245.4C1140.5,243.3 1136.6,240.6 1134.9,239.5C1133.3,238.4 1130.1,236.0 1127.9,234.2C1125.6,232.5 1123.4,231.0 1122.9,231.0C1122.3,231.0 1119.3,229.3 1116.2,227.1C1113.1,225.0 1107.6,221.7 1104.0,219.8C1097.4,216.2 1095.4,215.1 1081.8,207.4C1077.5,205.0 1073.7,203.0 1073.3,203.0C1072.9,203.0 1066.7,200.1 1059.5,196.6C1043.4,188.7 1013.1,176.0 1010.4,176.0C1009.8,176.0 1007.1,174.9 1004.3,173.5C1001.5,172.2 997.9,170.8 996.3,170.5C994.8,170.1 991.9,169.3 990.0,168.5C977.2,163.7 942.4,154.8 919.1,150.5C905.5,147.9 904.6,147.8 901.3,149.4C895.5,152.2 890.0,149.5 890.0,143.9C890.0,137.1 897.2,135.0 903.4,139.9C905.5,141.6 907.8,142.6 908.6,142.3C909.4,142.0 910.6,142.2 911.3,142.8C911.9,143.3 914.3,144.0 916.5,144.3C934.6,147.0 932.2,146.4 969.0,156.5C997.6,164.4 1023.1,173.8 1054.7,188.1C1064.5,192.5 1073.4,196.4 1074.5,196.7C1075.6,197.0 1077.4,198.0 1078.5,199.0C1079.6,199.9 1082.8,201.8 1085.5,203.2C1091.9,206.5 1097.1,209.3 1098.4,210.3C1099.0,210.7 1105.1,214.3 1112.0,218.2C1118.9,222.1 1127.3,227.2 1130.6,229.6C1134.0,232.0 1137.1,234.0 1137.4,234.0C1138.2,234.0 1155.4,245.8 1163.5,251.9C1198.6,278.4 1228.1,305.4 1256.2,336.8C1261.8,342.9 1266.7,348.0 1267.2,348.0C1267.6,348.0 1268.0,348.6 1268.0,349.3C1268.0,350.7 1269.7,353.0 1284.5,371.9C1294.0,384.1 1299.4,391.8 1308.6,406.0C1312.3,411.8 1316.4,417.9 1317.6,419.5C1318.8,421.1 1321.2,425.0 1322.7,428.0C1324.3,431.0 1327.0,435.5 1328.6,438.0C1333.3,445.2 1352.6,483.4 1359.2,498.5C1362.5,506.2 1366.2,514.8 1367.4,517.5C1368.6,520.2 1370.2,524.5 1370.9,527.0C1372.4,532.0 1374.5,538.0 1376.4,542.5C1377.2,544.1 1379.2,550.0 1381.0,555.5C1382.8,561.0 1384.7,565.9 1385.1,566.4C1385.6,567.0 1386.0,568.5 1386.0,569.9C1386.0,571.2 1386.9,575.1 1387.9,578.4C1390.1,585.4 1392.9,595.9 1396.6,611.5C1399.0,621.9 1399.9,626.2 1402.0,639.0C1402.5,642.0 1403.8,649.9 1405.0,656.5C1406.1,663.1 1407.0,670.1 1407.0,672.0C1407.0,673.9 1407.7,678.4 1408.5,682.0C1413.5,703.5 1414.8,794.7 1410.6,835.0C1408.4,856.0 1405.9,876.3 1405.4,877.1C1405.0,877.8 1404.5,880.8 1402.1,898.5C1401.6,901.8 1400.6,907.0 1399.8,910.0C1399.0,913.0 1397.5,919.1 1396.6,923.5C1395.7,927.9 1394.2,934.0 1393.4,937.0C1392.5,940.0 1391.1,945.9 1390.1,950.0C1389.1,954.1 1386.6,963.1 1384.6,970.0C1381.3,981.2 1379.7,985.8 1376.9,992.5C1376.5,993.6 1375.8,995.6 1375.5,997.0C1375.1,998.4 1374.2,1000.9 1373.5,1002.5C1372.8,1004.1 1369.5,1012.7 1366.0,1021.5C1355.2,1049.3 1345.5,1069.9 1332.9,1092.1C1330.2,1096.9 1328.0,1101.4 1328.0,1102.1C1327.9,1102.9 1326.6,1105.1 1324.9,1107.0C1323.2,1108.9 1322.0,1110.0 1322.2,1109.5C1322.4,1109.0 1322.2,1108.4 1321.7,1108.2C1320.1,1107.7 1319.8,1108.1 1320.9,1109.4C1322.5,1111.3 1313.1,1128.1 1301.7,1143.7C1300.1,1145.8 1296.7,1150.9 1294.0,1155.0C1291.3,1159.1 1287.1,1165.0 1284.6,1168.0C1282.1,1171.0 1278.7,1175.3 1277.0,1177.5C1265.3,1192.9 1261.7,1197.2 1260.5,1197.6C1259.8,1197.9 1258.0,1199.9 1256.7,1201.9C1252.8,1207.8 1212.7,1247.5 1201.2,1257.0C1176.6,1277.2 1178.9,1275.3 1167.5,1283.7C1152.3,1294.8 1140.6,1302.2 1141.2,1300.2C1141.4,1299.8 1141.2,1299.4 1140.8,1299.2C1139.1,1298.7 1138.8,1299.1 1139.9,1300.4C1140.9,1301.6 1140.7,1302.1 1138.8,1303.3C1128.7,1309.5 1113.0,1318.8 1111.0,1319.8C1109.6,1320.5 1106.7,1322.1 1104.5,1323.5C1102.3,1324.8 1097.3,1327.5 1093.5,1329.4C1089.7,1331.3 1084.5,1334.0 1082.0,1335.4C1064.8,1345.0 1033.1,1358.1 1005.5,1367.1C998.9,1369.2 992.6,1371.4 991.5,1371.9C990.4,1372.4 986.4,1373.6 982.5,1374.5C978.6,1375.4 972.8,1376.9 969.5,1377.9C959.5,1381.0 937.2,1385.9 924.0,1387.9C908.7,1390.3 904.4,1391.3 900.5,1393.4C896.4,1395.6 894.7,1395.4 892.2,1392.7ZM701.5,1389.2C700.4,1389.0 698.4,1387.7 697.0,1386.4C695.2,1384.8 691.1,1383.2 684.0,1381.5C663.3,1376.4 657.2,1374.7 636.5,1368.0C600.4,1356.3 571.8,1345.0 548.3,1333.1C543.9,1330.9 539.9,1329.0 539.6,1329.0C539.3,1329.0 535.6,1326.8 531.4,1324.1C527.2,1321.3 522.4,1318.8 520.7,1318.4C519.0,1318.1 515.9,1316.7 513.8,1315.4C511.7,1314.1 509.8,1313.0 509.6,1313.0C508.7,1313.0 500.3,1307.1 499.0,1305.5C498.3,1304.7 497.2,1304.0 496.5,1304.0C495.8,1304.0 491.5,1302.2 487.0,1299.9C469.8,1291.2 446.7,1294.6 428.7,1308.3C426.0,1310.3 423.4,1312.0 422.8,1312.0C422.3,1312.0 420.5,1312.9 418.8,1314.1C411.4,1319.4 394.7,1322.2 387.0,1319.5C383.5,1318.3 378.3,1317.9 363.2,1318.0C339.1,1318.0 337.5,1316.5 351.9,1307.3C354.8,1305.4 358.3,1302.6 359.7,1301.0C370.3,1288.3 393.2,1278.3 413.5,1277.4C426.3,1276.8 425.2,1276.6 458.0,1285.3C471.8,1289.0 475.7,1288.2 466.7,1283.5C458.2,1279.1 451.2,1274.1 450.5,1272.0C450.2,1271.0 448.0,1269.0 445.7,1267.5C443.4,1266.1 439.5,1263.4 437.0,1261.5C434.5,1259.6 431.4,1257.3 430.0,1256.3C428.6,1255.4 425.7,1253.2 423.5,1251.6C405.0,1237.4 382.0,1232.5 357.0,1237.6C350.1,1239.0 341.4,1240.7 337.5,1241.5C323.2,1244.3 308.6,1243.0 292.5,1237.3C267.6,1228.5 262.5,1227.6 243.8,1228.4C228.0,1229.0 225.0,1228.5 225.0,1225.0C225.0,1224.1 229.3,1221.0 237.4,1216.2C239.0,1215.3 243.2,1212.6 246.8,1210.2C250.4,1207.9 254.4,1205.7 255.7,1205.4C257.0,1205.0 258.3,1204.4 258.6,1203.9C260.8,1200.3 279.1,1194.6 295.6,1192.5C310.1,1190.6 331.4,1193.7 337.0,1198.5C337.8,1199.3 339.8,1200.2 341.4,1200.6C344.4,1201.3 355.3,1206.8 362.5,1211.1C368.3,1214.6 375.2,1218.3 386.5,1224.0C392.0,1226.8 398.5,1230.2 400.9,1231.6C406.1,1234.4 406.0,1234.4 406.0,1232.5C406.0,1231.7 405.6,1231.0 405.2,1231.0C404.0,1231.0 398.3,1226.1 389.2,1217.2C384.3,1212.4 381.4,1210.3 380.9,1211.1C379.7,1213.1 378.0,1211.1 378.0,1207.6C378.0,1205.3 377.2,1203.6 375.2,1201.8C371.5,1198.4 362.3,1188.2 358.0,1182.7C356.1,1180.3 353.1,1177.2 351.3,1175.9C349.5,1174.6 347.6,1172.4 347.0,1171.0C345.6,1167.6 326.2,1147.7 320.3,1143.5C306.8,1133.9 303.7,1131.9 295.7,1128.1C291.0,1125.9 286.6,1124.0 286.0,1124.0C285.4,1124.0 285.0,1123.4 285.2,1122.8C285.4,1122.1 285.0,1121.5 284.5,1121.5C283.9,1121.5 283.6,1121.8 283.7,1122.2C284.3,1123.9 279.1,1124.0 274.5,1122.4C269.4,1120.7 254.9,1120.9 244.5,1122.8C234.5,1124.7 219.8,1121.5 203.4,1113.9C201.1,1112.9 199.0,1112.0 198.7,1112.0C196.5,1112.0 180.0,1099.7 180.0,1098.1C180.0,1096.0 186.7,1094.0 193.7,1094.0L197.3,1094.0L190.0,1088.8C186.0,1085.9 181.7,1082.9 180.5,1082.2C179.2,1081.6 173.6,1076.5 168.1,1071.0C162.5,1065.5 157.4,1061.0 156.7,1061.0C156.0,1061.0 153.7,1059.2 151.6,1057.1C144.5,1049.8 149.5,1048.2 180.9,1047.6C191.3,1047.4 197.5,1046.9 198.3,1046.1C199.9,1044.5 205.4,1044.7 212.9,1046.9C216.5,1048.0 221.1,1049.1 223.1,1049.4C225.0,1049.7 228.0,1051.0 229.7,1052.3C231.4,1053.5 235.1,1055.6 237.9,1057.0C240.7,1058.3 245.2,1061.3 247.8,1063.8C250.4,1066.2 254.1,1069.0 256.0,1070.0C260.7,1072.5 266.5,1078.8 285.6,1102.4C287.9,1105.2 292.9,1110.5 296.9,1114.3C300.8,1118.0 304.0,1121.4 304.0,1121.9C304.0,1122.9 311.5,1128.0 313.0,1128.0C314.4,1128.0 308.6,1117.3 305.4,1113.9C304.1,1112.5 303.0,1110.7 303.0,1109.8C303.0,1108.9 301.9,1107.5 300.5,1106.6C296.6,1104.0 294.3,1101.1 293.6,1097.7C293.2,1096.0 291.7,1092.9 290.1,1091.0C288.6,1089.1 285.2,1083.5 282.7,1078.5C280.1,1073.5 276.2,1067.3 274.0,1064.6C271.8,1062.0 268.6,1057.2 266.9,1054.0C265.2,1050.8 263.0,1047.3 262.0,1046.2C260.9,1045.1 259.1,1042.0 257.8,1039.3C256.6,1036.7 252.9,1030.5 249.6,1025.6C246.4,1020.7 243.0,1014.8 242.2,1012.6C241.3,1010.3 239.7,1007.4 238.5,1006.0C237.3,1004.6 234.8,1000.8 233.0,997.5C231.1,994.2 228.6,990.3 227.4,988.8C226.2,987.2 224.9,985.2 224.6,984.3C224.3,983.3 222.1,981.6 219.8,980.5C217.4,979.3 215.5,977.7 215.5,977.0C215.5,970.7 199.7,963.6 184.0,962.9C175.0,962.5 170.4,961.9 167.5,960.6C162.9,958.5 154.9,953.1 153.7,951.2C153.3,950.6 150.2,946.7 146.9,942.6C141.7,936.1 139.5,931.1 141.8,930.9C166.9,928.5 175.8,929.6 186.2,936.5C189.6,938.8 191.4,941.4 189.1,940.8C188.3,940.5 188.0,941.0 188.0,942.6C188.0,943.0 188.6,942.7 189.4,942.1C190.8,940.9 192.0,942.0 199.5,951.4C204.0,957.1 214.3,966.9 215.8,967.0C217.0,967.0 213.2,959.4 208.0,951.5C206.5,949.3 203.6,944.9 201.4,941.6C196.6,934.4 195.6,932.7 193.3,927.0C190.3,919.6 166.6,897.8 159.0,895.5C153.3,893.8 139.4,877.8 133.6,866.3C129.3,857.7 129.2,855.8 132.5,853.6L134.9,852.0L132.1,843.8C127.6,830.7 127.1,829.0 126.1,820.5C124.1,804.2 126.7,801.9 137.4,810.5C141.2,813.5 145.0,816.0 145.7,816.0C146.4,816.0 147.0,816.4 147.0,817.0C147.0,817.5 148.8,818.4 151.0,819.0C154.2,819.9 155.4,820.9 157.0,824.0C158.1,826.1 159.4,828.2 160.0,828.5C160.6,828.9 162.2,831.5 163.6,834.3C166.9,840.7 166.7,840.5 168.4,839.1C171.0,836.9 177.9,846.2 187.8,865.3C188.6,866.9 189.8,872.5 190.6,877.8C194.6,906.2 198.3,921.7 202.8,928.4C204.3,930.7 206.6,935.3 207.9,938.7C209.1,942.0 211.0,945.7 212.0,946.7C212.9,947.8 214.1,949.7 214.5,951.1C214.9,952.4 215.8,954.2 216.5,955.0C217.2,955.8 218.9,958.8 220.3,961.6C221.7,964.4 224.0,968.1 225.4,969.8C227.0,971.6 228.0,974.0 228.0,976.0C228.0,979.0 234.7,987.0 237.2,987.0C237.6,987.0 238.0,987.9 238.0,989.0C238.0,990.1 239.8,994.2 242.0,998.1C244.2,1002.0 246.0,1005.4 246.0,1005.8C246.0,1006.1 246.6,1007.1 247.4,1007.9C248.1,1008.8 250.4,1012.6 252.5,1016.5C257.7,1026.4 261.1,1031.9 263.8,1034.7C265.0,1036.0 266.0,1037.5 266.0,1038.1C266.0,1039.6 270.4,1047.0 271.3,1047.0C271.7,1047.0 271.7,1046.2 271.2,1045.2C266.4,1035.6 259.8,1018.1 256.1,1005.0C255.1,1001.4 253.5,996.0 252.6,993.0C251.7,990.0 250.1,982.3 249.1,976.0C248.0,969.7 246.2,960.5 245.0,955.5C243.0,946.7 240.6,933.2 239.0,920.0C238.5,916.4 237.4,910.1 236.6,906.0C235.7,901.9 234.5,895.1 233.9,891.0C233.4,886.9 232.1,880.6 231.0,877.0C230.0,873.4 228.4,867.9 227.6,864.8C226.0,859.3 223.9,856.0 221.9,856.0C221.3,856.0 221.2,855.4 221.8,854.4C223.0,852.3 218.6,839.1 216.1,837.0C215.8,836.7 214.1,834.5 212.5,832.1C210.8,829.6 208.6,826.7 207.5,825.5C190.7,807.8 184.9,791.9 184.0,760.5C183.2,734.6 183.0,736.0 187.3,736.0C191.0,736.0 194.3,739.0 195.4,743.2C195.7,744.7 196.8,746.7 197.8,747.7C198.8,748.7 200.1,750.7 200.8,752.2C201.4,753.8 203.8,757.0 206.2,759.5C212.5,766.5 219.3,779.3 221.9,789.6C223.2,794.5 224.9,800.3 225.7,802.5C226.7,805.1 227.3,811.3 227.5,820.5C227.9,836.5 230.2,850.9 235.5,870.0C236.6,873.9 236.8,871.1 237.0,847.5C237.1,832.6 237.5,800.9 237.9,777.0C238.3,753.1 238.2,730.1 237.8,726.0C235.6,706.9 232.8,691.3 230.2,683.5C229.1,680.2 228.0,676.3 227.6,674.8C227.2,673.0 225.7,671.3 223.2,670.0C216.9,666.7 215.5,665.3 216.9,663.6C217.7,662.6 217.8,662.0 217.0,661.5C216.1,660.9 215.6,661.6 215.9,663.2C216.2,665.0 213.9,663.8 211.8,661.0C206.5,653.8 205.0,641.4 208.2,632.2C211.1,624.4 212.5,623.8 219.3,628.3C230.3,635.7 233.1,642.1 233.0,660.3C232.9,670.5 233.3,673.9 235.3,681.0C236.7,685.7 238.0,690.4 238.2,691.5C238.4,692.6 239.0,679.1 239.4,661.5C239.8,643.9 240.2,626.8 240.3,623.5C240.5,618.4 240.0,616.4 237.1,610.5C229.9,595.9 231.8,581.1 242.3,569.8C243.7,568.3 246.1,565.5 247.6,563.5C250.9,559.1 255.5,558.6 257.0,562.4C264.7,582.8 263.3,598.2 252.4,611.7C247.5,617.7 247.1,619.4 245.3,641.5C243.4,664.6 243.9,668.8 247.6,659.2C249.7,653.8 249.9,652.3 249.0,648.5C247.2,640.4 253.7,620.0 258.1,620.0C259.0,620.0 261.4,619.3 263.5,618.5C266.4,617.2 267.5,617.1 268.7,618.1C277.8,625.7 270.8,653.8 259.7,653.9C256.3,654.0 255.8,654.4 254.0,658.2C244.8,678.5 244.0,684.1 244.1,731.0C244.2,752.2 243.9,781.8 243.6,796.9C243.0,824.9 243.4,827.8 246.4,817.0C250.9,800.8 252.1,797.0 253.9,792.6C255.1,790.0 256.5,784.9 257.0,781.3C257.6,777.7 258.5,774.0 258.9,773.1C260.4,770.4 266.0,748.1 266.0,745.1C266.0,743.5 266.9,741.1 268.0,739.7C269.1,738.3 270.0,736.5 270.0,735.6C270.0,725.4 294.4,693.2 305.4,689.1C308.2,688.0 313.6,685.6 317.3,683.6C321.1,681.6 325.0,680.0 326.1,680.0C328.6,680.0 343.2,676.0 344.5,675.0C346.4,673.4 352.8,672.8 354.9,673.9C358.2,675.7 357.4,678.0 351.7,683.5C342.3,692.4 331.7,707.0 329.5,714.0C329.1,715.4 327.7,717.9 326.4,719.6C325.1,721.3 324.0,723.2 324.0,723.7C324.0,724.3 323.3,725.4 322.4,726.1C321.5,726.9 319.7,729.1 318.5,731.1C314.8,736.8 296.9,754.2 291.1,757.5C290.2,758.0 289.9,757.9 290.4,757.2C290.7,756.6 290.6,755.9 290.1,755.6C289.6,755.2 288.9,755.4 288.6,755.9C288.2,756.4 288.4,757.1 289.0,757.5C289.5,757.8 285.9,762.2 281.0,767.2C276.1,772.3 271.3,778.2 270.4,780.3C269.4,782.4 267.1,785.7 265.3,787.5C263.5,789.3 262.0,791.7 262.0,792.8C262.0,794.0 261.6,795.2 261.0,795.5C260.5,795.8 259.2,799.0 258.1,802.5C257.0,806.0 255.7,809.7 255.1,810.7C252.7,815.2 247.9,836.0 244.5,856.3C242.4,869.2 244.7,929.5 247.5,934.1C247.8,934.5 248.4,939.1 249.0,944.3C250.0,954.2 251.2,960.3 253.7,968.0C254.5,970.5 255.1,973.2 255.2,974.0C255.3,977.0 259.1,993.6 261.0,999.5C262.1,1002.8 264.0,1009.0 265.2,1013.2C267.3,1020.9 269.8,1024.1 268.6,1017.8C265.2,1000.1 265.6,931.6 269.3,921.0C270.7,916.9 272.8,910.0 274.0,905.8C276.4,897.0 276.7,896.3 283.4,886.0C289.3,876.8 296.4,870.5 314.0,858.6C317.0,856.5 320.7,853.8 322.2,852.4C323.7,851.1 325.6,850.0 326.4,850.0C327.2,850.0 329.7,848.4 332.1,846.5C341.6,838.5 343.9,843.4 337.1,857.3C333.0,865.7 331.8,869.2 331.3,874.7C331.0,878.4 330.4,882.0 329.9,882.6C326.3,887.1 325.0,898.5 328.1,897.8C330.1,897.4 329.8,904.5 327.7,909.0C326.9,910.9 324.8,916.0 323.2,920.3C320.0,928.6 313.1,940.6 310.0,943.5C308.9,944.5 308.0,945.8 308.0,946.4C308.0,947.0 304.3,951.1 299.8,955.5C295.3,959.9 292.2,962.8 292.9,961.8C293.8,960.6 293.8,960.0 293.0,959.5C291.2,958.4 289.3,960.7 290.8,962.2C292.4,963.8 292.3,964.6 290.1,966.7C287.1,969.5 284.4,975.1 283.6,979.8C283.3,982.2 282.3,984.8 281.6,985.5C280.9,986.3 280.0,988.9 279.7,991.3C279.3,993.8 278.1,997.4 276.9,999.5C274.3,1003.8 274.6,1028.0 277.4,1037.5C278.1,1040.2 279.8,1046.1 281.0,1050.5C282.1,1054.9 285.1,1062.7 287.6,1067.7C290.0,1072.8 292.0,1077.3 292.0,1077.8C292.0,1079.2 299.2,1092.4 301.1,1094.5C302.1,1095.6 303.8,1098.5 304.9,1101.0C306.0,1103.5 308.7,1108.0 310.9,1111.0C313.1,1114.0 318.7,1122.1 323.3,1129.0C328.0,1135.9 334.1,1144.0 336.8,1147.0C347.1,1158.1 348.0,1159.2 348.0,1160.0C348.0,1160.4 349.1,1161.5 350.5,1162.4C351.9,1163.3 353.0,1164.5 353.0,1165.0C353.0,1166.6 360.0,1175.7 365.1,1180.9C367.7,1183.4 371.3,1187.7 373.1,1190.5C376.9,1196.0 379.5,1198.6 382.5,1199.6C383.5,1200.0 385.0,1200.9 385.8,1201.7C388.8,1204.7 387.9,1201.7 382.4,1190.3C372.2,1169.5 362.1,1137.4 359.0,1116.5C358.4,1112.1 357.4,1106.7 356.9,1104.5C356.4,1102.3 355.5,1095.5 355.0,1089.5C354.0,1077.2 351.6,1065.6 349.4,1062.3C348.6,1061.1 348.0,1059.3 348.0,1058.3C348.0,1052.9 342.9,1040.0 340.7,1040.0C337.6,1039.9 333.4,1037.5 334.9,1036.6C335.5,1036.2 335.8,1035.4 335.4,1034.9C335.1,1034.4 334.4,1034.2 333.9,1034.6C333.4,1034.9 333.2,1035.6 333.5,1036.1C334.9,1038.2 332.2,1036.7 329.3,1033.8C323.8,1028.0 322.7,1024.6 323.2,1015.6C324.0,1001.7 327.8,998.0 336.8,1002.2C347.9,1007.3 353.4,1022.1 348.8,1034.6C347.8,1037.5 348.1,1039.2 351.5,1049.6C355.5,1061.8 356.8,1062.6 356.9,1053.2C357.0,1050.8 357.8,1046.0 358.7,1042.5C360.4,1036.2 360.4,1035.9 358.2,1029.8C353.3,1016.0 356.2,1006.7 368.3,997.1C369.7,996.0 370.6,996.1 374.3,997.9C382.7,1002.0 385.1,1014.2 379.8,1026.0C378.7,1028.5 377.7,1031.1 377.6,1031.9C377.5,1032.6 375.0,1034.2 372.2,1035.4C365.2,1038.4 365.3,1038.2 363.0,1049.0C358.5,1070.7 359.5,1092.3 367.0,1129.4C371.9,1153.8 374.5,1153.0 373.5,1127.3C372.2,1092.8 372.2,1091.1 375.0,1085.5C377.8,1079.9 385.6,1068.9 387.7,1067.7C388.5,1067.2 390.0,1064.9 391.0,1062.6C392.2,1059.7 393.8,1057.9 395.9,1057.1C403.2,1054.0 404.4,1057.5 403.5,1080.0L402.8,1097.5L398.8,1104.3C396.6,1108.1 392.6,1113.5 389.8,1116.3C381.6,1124.9 380.5,1127.9 379.5,1146.0C379.1,1152.8 379.4,1157.2 380.5,1161.3C381.3,1164.5 382.0,1167.9 382.0,1168.9C382.0,1176.4 396.7,1207.2 402.2,1211.1C403.6,1212.2 405.2,1214.5 405.5,1216.2C407.2,1223.8 426.5,1244.5 430.9,1243.3C432.3,1243.0 432.9,1243.5 433.3,1245.9C433.7,1248.0 435.1,1249.7 437.7,1251.3C439.8,1252.7 442.6,1255.0 444.0,1256.4C445.3,1257.9 447.9,1260.0 449.7,1261.1C451.5,1262.3 453.0,1263.6 453.0,1264.1C453.0,1265.1 460.1,1271.9 461.3,1272.0C462.3,1272.0 482.6,1285.6 486.9,1289.1C488.9,1290.7 490.9,1292.0 491.5,1292.0C492.1,1292.0 493.9,1293.3 495.5,1295.0C497.1,1296.7 498.7,1298.0 499.1,1298.0C499.5,1298.0 503.6,1300.3 508.2,1303.1C520.8,1310.8 526.2,1313.4 529.7,1313.1C532.9,1312.9 544.0,1317.6 544.0,1319.1C544.0,1319.6 544.6,1320.0 545.2,1320.0C545.9,1320.0 548.8,1321.8 551.7,1323.9C560.6,1330.7 580.0,1340.6 597.0,1347.1C598.9,1347.8 601.9,1349.2 603.5,1350.2C605.1,1351.2 607.3,1352.0 608.4,1352.0C609.4,1352.0 613.0,1353.3 616.4,1354.9C619.7,1356.5 624.1,1358.1 626.0,1358.5C627.9,1358.9 632.9,1360.5 637.0,1362.0C649.6,1366.7 665.2,1371.1 671.5,1371.7C674.8,1372.0 678.4,1372.7 679.5,1373.3C684.8,1376.1 695.4,1377.9 699.5,1376.8C707.3,1374.7 712.6,1378.6 710.4,1384.7C709.4,1387.6 704.8,1389.9 701.5,1389.2ZM787.0,1365.9C787.0,1364.5 789.9,1361.6 790.6,1362.3C791.4,1363.0 789.1,1367.0 788.0,1367.0C787.4,1367.0 787.0,1366.5 787.0,1365.9ZM558.4,1356.9C558.1,1356.4 557.5,1356.2 557.0,1356.5C556.5,1356.8 555.9,1356.6 555.5,1356.0C555.1,1355.4 554.4,1355.2 553.9,1355.6C553.4,1355.9 553.2,1356.6 553.6,1357.1C553.9,1357.6 554.5,1357.8 555.0,1357.5C555.5,1357.2 556.1,1357.4 556.5,1358.0C556.9,1358.6 557.6,1358.8 558.1,1358.4C558.6,1358.1 558.8,1357.4 558.4,1356.9ZM797.8,1323.2C792.6,1317.9 792.0,1311.2 796.4,1308.8C805.9,1303.6 812.4,1313.9 805.1,1322.7C801.9,1326.6 801.0,1326.7 797.8,1323.2ZM408.7,1312.5C413.4,1310.9 419.8,1307.7 424.9,1304.3C429.5,1301.3 436.6,1297.2 440.6,1295.3C444.7,1293.5 448.0,1291.7 448.0,1291.4C448.0,1289.0 412.6,1294.3 412.4,1296.8C412.3,1297.4 412.2,1298.4 412.1,1298.9C412.1,1299.3 408.5,1303.1 404.2,1307.3C395.4,1316.1 395.8,1316.7 408.7,1312.5ZM398.4,1309.9C398.1,1309.4 397.4,1309.2 396.9,1309.6C396.4,1309.9 396.2,1310.6 396.6,1311.1C396.9,1311.6 396.8,1312.0 396.3,1311.9C394.6,1311.6 393.9,1312.0 394.5,1313.1C395.0,1313.8 395.8,1313.5 397.1,1312.4C398.1,1311.5 398.7,1310.3 398.4,1309.9ZM392.2,1310.6C395.5,1309.1 400.5,1305.6 404.2,1302.1L410.5,1296.0L407.0,1296.6C405.1,1296.9 401.0,1298.1 398.0,1299.2C395.0,1300.3 386.0,1303.5 378.0,1306.3C361.8,1312.1 361.8,1312.5 378.1,1312.9C385.3,1313.0 387.5,1312.7 392.2,1310.6ZM510.4,1297.2C504.1,1290.8 496.5,1282.3 493.6,1278.5C490.6,1274.7 485.6,1269.0 482.5,1266.0C467.9,1252.0 453.3,1236.4 452.4,1233.8C452.1,1232.8 451.4,1232.0 450.9,1232.0C450.4,1232.0 450.0,1231.5 450.0,1230.9C450.0,1230.3 448.8,1228.2 447.2,1226.4C445.7,1224.5 443.3,1221.5 441.7,1219.6C440.2,1217.7 438.4,1214.5 437.6,1212.4C436.9,1210.2 434.8,1205.5 433.1,1201.8C429.2,1193.6 426.9,1182.0 427.5,1173.7C429.6,1145.2 430.3,1141.1 436.1,1121.8C440.0,1109.1 444.1,1111.7 447.5,1129.0C448.7,1135.0 452.1,1144.1 457.5,1155.5C465.4,1172.0 467.8,1178.0 470.1,1186.6C472.2,1194.7 472.8,1197.2 475.6,1210.0C476.4,1214.1 477.8,1220.6 478.7,1224.4C483.8,1248.2 501.3,1279.6 519.1,1297.0C520.5,1298.4 522.2,1301.2 522.9,1303.3C523.6,1305.3 524.6,1307.0 525.1,1307.0C525.7,1307.0 525.8,1307.5 525.5,1308.0C524.1,1310.3 521.3,1308.4 510.4,1297.2ZM379.5,1300.3C402.7,1291.8 418.2,1287.7 431.3,1286.5C439.6,1285.7 439.5,1285.5 430.0,1283.6C408.3,1279.0 391.2,1283.4 371.8,1298.4C364.5,1304.0 361.8,1307.1 365.8,1305.5C366.7,1305.1 372.9,1302.8 379.5,1300.3ZM471.2,1243.8C467.6,1238.4 458.5,1221.4 457.5,1218.0C457.1,1216.6 455.4,1212.8 453.8,1209.5C452.2,1206.2 450.2,1201.2 449.4,1198.5C442.4,1174.4 439.1,1158.4 438.9,1148.1C438.7,1136.6 437.6,1134.3 436.2,1142.5C433.8,1157.7 433.4,1166.4 434.6,1176.9C435.1,1181.2 435.0,1183.1 434.3,1182.7C433.2,1182.0 434.2,1189.2 436.0,1194.4C437.3,1198.3 437.3,1199.8 435.8,1199.6C435.1,1199.6 434.5,1200.0 434.5,1200.5C434.5,1201.0 435.2,1201.4 436.0,1201.3C436.9,1201.2 439.0,1203.8 441.4,1208.3C447.1,1218.8 455.8,1230.5 468.2,1244.3C474.0,1250.8 475.8,1250.5 471.2,1243.8ZM479.0,1244.0C477.6,1241.5 473.8,1227.2 470.4,1211.5C465.6,1190.0 463.9,1183.4 461.4,1178.1C460.1,1175.2 459.0,1172.2 459.0,1171.5C459.0,1170.9 457.3,1167.2 455.3,1163.4C453.3,1159.6 449.7,1151.5 447.3,1145.5L442.9,1134.5L443.5,1145.0C444.2,1157.3 445.9,1167.7 449.5,1181.5C452.4,1193.0 452.3,1192.3 451.1,1191.5C450.6,1191.2 449.9,1191.4 449.6,1191.9C449.2,1192.4 449.4,1193.1 449.9,1193.4C450.4,1193.8 451.2,1193.5 451.6,1192.9C452.6,1191.3 453.6,1193.3 456.1,1201.5C457.3,1205.3 458.9,1209.8 459.7,1211.5C460.6,1213.2 461.7,1215.4 462.3,1216.5C462.9,1217.6 465.7,1223.1 468.6,1228.8C471.5,1234.4 474.6,1239.8 475.5,1240.7C476.4,1241.6 477.6,1243.4 478.1,1244.8C478.6,1246.2 479.3,1247.0 479.6,1246.7C479.9,1246.4 479.6,1245.2 479.0,1244.0ZM346.0,1234.5C349.0,1233.6 355.9,1232.1 361.3,1231.2C366.7,1230.3 371.0,1229.0 371.0,1228.5C370.8,1227.0 363.2,1224.3 355.9,1223.0C349.0,1221.8 339.8,1220.0 328.0,1217.6C312.4,1214.4 286.1,1214.7 264.5,1218.3C251.1,1220.6 247.6,1223.0 257.8,1223.0C260.4,1223.0 268.0,1224.2 274.8,1225.7C286.2,1228.1 287.5,1228.2 293.9,1227.0C302.8,1225.3 304.7,1226.1 299.1,1228.9C293.7,1231.7 294.5,1232.7 303.7,1235.2C312.2,1237.5 337.2,1237.1 346.0,1234.5ZM307.0,1225.1C307.0,1223.8 314.4,1220.4 319.2,1219.5C325.6,1218.3 323.4,1220.5 315.8,1223.0C311.8,1224.3 308.2,1225.5 307.8,1225.7C307.3,1225.9 307.0,1225.7 307.0,1225.1ZM447.4,1221.1C448.2,1219.9 445.3,1217.7 444.0,1218.5C443.2,1219.0 443.2,1219.6 444.1,1220.6C445.4,1222.2 446.6,1222.4 447.4,1221.1ZM362.5,1217.4C361.4,1216.5 357.4,1214.3 353.5,1212.5C349.6,1210.6 345.4,1208.4 344.0,1207.6C339.5,1204.9 334.9,1203.1 331.1,1202.4C329.1,1202.1 325.0,1200.9 322.0,1199.8C306.5,1194.1 283.2,1197.9 259.1,1210.1C249.7,1214.9 245.2,1218.0 249.6,1216.6C277.3,1208.3 328.8,1208.4 354.5,1216.8C357.8,1217.9 361.4,1218.8 362.5,1218.9L364.5,1218.9L362.5,1217.4ZM441.6,1135.4C441.1,1134.1 440.6,1134.0 439.8,1134.8C439.2,1135.4 439.0,1136.6 439.4,1137.6C439.9,1138.9 440.4,1139.0 441.2,1138.2C441.8,1137.6 442.0,1136.4 441.6,1135.4ZM290.6,1119.5C282.7,1112.7 261.5,1103.6 251.9,1102.8C249.3,1102.6 246.1,1101.7 244.7,1100.8C238.5,1096.7 216.9,1096.4 199.3,1100.2C193.8,1101.4 193.4,1103.1 198.3,1104.6C199.5,1105.0 202.3,1106.5 204.6,1108.1C214.7,1115.0 226.7,1117.1 255.1,1116.8C276.9,1116.6 277.7,1116.7 284.5,1119.2C293.5,1122.5 294.1,1122.5 290.6,1119.5ZM384.6,1118.5C384.5,1117.6 384.0,1117.0 383.4,1117.0C382.5,1117.0 382.1,1118.9 382.8,1120.3C383.4,1121.5 384.8,1120.1 384.6,1118.5ZM388.5,1109.8C396.3,1101.2 399.1,1091.2 397.5,1078.4L396.8,1072.7L394.3,1077.1C388.8,1086.6 380.4,1115.0 383.1,1115.0C383.5,1115.0 385.9,1112.6 388.5,1109.8ZM381.4,1097.5C382.4,1094.2 384.8,1087.7 386.7,1083.1C391.6,1071.0 389.2,1070.4 383.2,1082.2C378.1,1092.3 377.0,1095.9 377.0,1101.8C377.0,1108.7 378.5,1107.2 381.4,1097.5ZM282.0,1105.5C282.0,1103.5 250.4,1071.9 244.6,1068.1C229.1,1057.9 208.9,1050.2 205.3,1053.1C204.1,1054.2 200.1,1054.4 188.1,1054.2C171.5,1053.9 166.2,1054.9 174.1,1057.0C178.7,1058.2 186.5,1060.9 198.5,1065.5C202.3,1067.0 206.8,1068.5 208.5,1069.0C216.0,1071.0 224.2,1074.2 226.0,1075.7C227.6,1077.1 247.6,1088.1 258.0,1093.3C259.4,1094.0 262.5,1095.8 265.0,1097.5C274.6,1103.7 282.0,1107.2 282.0,1105.5ZM247.4,1093.8C240.5,1089.4 226.2,1082.4 221.0,1080.9C218.5,1080.2 215.4,1078.9 214.0,1078.0C211.3,1076.2 195.2,1069.2 192.3,1068.5C191.3,1068.3 185.1,1066.2 178.6,1064.0C172.0,1061.8 166.5,1060.1 166.4,1060.3C165.3,1061.4 189.5,1082.9 193.2,1084.3C194.2,1084.7 197.4,1086.5 200.4,1088.4C204.9,1091.3 206.9,1091.9 213.6,1092.4C236.8,1094.3 243.8,1095.0 246.5,1095.9C252.1,1097.7 252.4,1097.0 247.4,1093.8ZM277.0,1093.9C276.4,1092.8 275.5,1092.2 274.9,1092.5C274.4,1092.9 274.4,1093.9 275.0,1095.1C275.6,1096.2 276.5,1096.8 277.1,1096.5C277.6,1096.1 277.6,1095.1 277.0,1093.9ZM1332.3,1091.1C1333.3,1089.4 1333.6,1087.9 1333.1,1087.5C1332.0,1086.9 1325.8,1095.4 1326.7,1096.4C1327.6,1097.2 1330.1,1094.8 1332.3,1091.1ZM339.5,1030.8C337.7,1024.8 340.6,1022.5 343.3,1027.7L344.8,1030.4L345.4,1027.4C346.2,1023.6 344.0,1016.1 340.6,1011.7C338.0,1008.3 334.0,1006.2 334.0,1008.2C334.0,1008.7 333.6,1008.9 333.1,1008.5C331.8,1007.8 330.7,1009.7 331.6,1011.2C332.1,1011.9 332.7,1011.7 333.7,1010.5C334.4,1009.4 335.0,1009.1 335.0,1009.7C335.0,1012.0 332.3,1013.2 330.7,1011.6C325.0,1005.8 327.9,1023.9 333.9,1031.2C336.1,1034.0 340.3,1033.6 339.5,1030.8ZM373.6,1026.3C377.6,1020.3 377.8,1009.0 374.0,1009.0C372.1,1009.0 369.5,1006.9 368.7,1004.8C368.0,1002.8 363.3,1007.7 361.9,1011.7C360.3,1016.5 361.7,1026.2 363.6,1023.5C365.3,1021.2 368.4,1023.2 367.5,1026.1C365.9,1031.0 370.4,1031.1 373.6,1026.3ZM365.4,1002.8C365.1,1002.3 364.0,1002.6 362.9,1003.6C361.9,1004.5 361.3,1005.7 361.6,1006.2C361.9,1006.7 363.0,1006.4 364.1,1005.4C365.1,1004.5 365.7,1003.3 365.4,1002.8ZM288.1,961.2C292.3,955.9 297.7,949.4 300.1,946.8C302.5,944.2 305.1,941.3 305.8,940.3C311.7,931.9 315.1,926.2 316.5,922.2C317.5,919.6 318.7,916.5 319.2,915.3C321.4,910.7 319.3,910.8 314.9,915.6C312.5,918.3 309.1,921.9 307.4,923.6C304.1,927.1 295.7,940.7 288.7,954.0C283.6,963.5 280.2,966.0 281.5,959.4C282.5,953.9 288.1,944.8 289.6,946.1C290.4,946.8 291.0,946.8 291.5,946.0C292.3,944.6 291.1,942.8 289.8,943.6C289.2,944.0 289.3,943.3 290.0,942.1C290.9,940.4 291.4,940.1 292.5,941.0C293.4,941.8 294.0,941.8 294.5,941.0C295.3,939.7 294.1,937.8 292.9,938.6C290.7,939.9 297.1,929.2 302.1,922.9C318.2,903.0 318.6,902.2 322.0,887.0C323.2,881.8 325.2,874.1 326.5,870.0C329.1,861.8 329.1,860.4 326.4,864.7C325.4,866.2 322.6,869.9 320.2,872.9C317.9,875.9 314.7,880.4 313.2,882.9C309.9,888.5 306.4,894.1 304.9,895.8C303.7,897.3 293.3,919.9 289.0,930.7C285.5,939.2 281.8,952.3 279.5,963.5C278.6,967.9 277.7,972.4 277.4,973.5C277.0,975.3 277.1,975.3 278.7,973.2C279.7,972.0 283.9,966.6 288.1,961.2ZM277.8,947.0C288.4,913.1 318.1,858.5 323.5,863.0C324.3,863.7 325.2,863.4 326.4,862.2C328.6,859.7 327.2,858.5 324.7,860.7C322.8,862.4 322.7,862.4 323.3,860.7C324.3,858.1 323.4,858.6 308.4,869.9C302.8,874.0 295.1,881.4 293.3,884.3C292.9,885.0 291.4,886.3 290.0,887.1C288.6,888.0 286.3,891.2 284.9,894.1C273.3,918.0 272.2,922.0 271.4,945.3C270.6,965.4 271.5,972.3 273.6,962.5C274.3,959.2 276.2,952.2 277.8,947.0ZM192.0,956.7C192.0,954.6 163.1,942.0 158.2,942.0C158.0,942.0 158.0,941.4 158.3,940.6C158.6,939.8 158.3,938.7 157.6,938.1C155.9,936.6 154.7,938.0 156.2,939.7C157.2,940.9 156.9,941.0 154.7,940.5C150.9,939.5 151.3,941.1 156.2,946.5C161.1,951.9 162.2,952.5 171.0,955.7C178.5,958.3 192.0,959.0 192.0,956.7ZM190.0,947.1C190.0,943.1 173.0,934.0 165.8,934.1C154.2,934.2 155.5,937.3 168.6,940.5C172.4,941.5 178.2,943.5 181.5,945.0C188.0,948.0 190.0,948.5 190.0,947.1ZM187.5,890.6C184.6,873.4 174.6,849.0 170.5,849.0C169.7,849.0 169.0,849.3 169.0,849.8C169.0,850.2 168.5,853.2 167.9,856.5C166.5,864.3 166.6,866.8 168.7,869.9C169.6,871.3 171.7,875.0 173.4,878.0C175.0,881.0 177.3,885.2 178.4,887.2C179.6,889.2 182.3,894.0 184.5,897.9C189.4,906.5 189.9,905.2 187.5,890.6ZM179.9,901.2C178.3,899.2 176.3,895.9 173.9,891.0C172.9,889.1 170.5,885.2 168.6,882.5C166.6,879.8 164.5,876.3 163.9,874.8C163.3,873.2 162.2,872.0 161.6,872.0C160.9,872.0 159.3,871.1 158.0,870.0C156.7,868.9 154.2,867.6 152.4,867.1C150.6,866.6 147.8,865.3 146.2,864.2C142.5,861.5 138.0,860.3 138.0,862.0C138.0,868.0 153.9,885.6 167.4,894.5C171.3,897.1 175.6,900.1 177.0,901.1C180.2,903.4 181.7,903.5 179.9,901.2ZM157.4,862.2C156.5,860.2 154.7,857.1 153.4,855.3C152.1,853.6 151.0,851.8 151.0,851.5C151.0,851.1 148.4,846.6 145.2,841.3C139.9,832.4 134.0,822.0 134.0,821.2C134.0,821.0 134.4,821.1 134.9,821.5C136.6,822.5 137.0,820.3 135.5,819.0C134.1,817.9 133.6,818.3 133.9,820.2C133.9,820.7 133.6,821.0 133.0,821.0C130.3,821.0 133.4,836.8 137.8,845.5C141.0,851.9 147.7,859.6 153.2,863.1C158.9,866.7 159.2,866.7 157.4,862.2ZM164.4,855.2C163.7,851.0 162.7,846.0 162.1,844.3C161.6,842.5 161.5,841.2 162.0,841.3C162.4,841.4 162.8,841.0 162.8,840.5C162.9,840.0 162.3,839.6 161.7,839.7C161.0,839.9 159.6,838.4 158.6,836.6C155.5,830.9 135.5,813.8 137.4,818.5C137.7,819.3 138.3,820.7 138.6,821.5C139.0,822.4 138.9,823.0 138.4,822.9C136.6,822.6 135.9,823.0 136.5,824.0C137.0,824.8 137.6,824.8 138.5,824.0C139.4,823.3 140.0,823.3 140.7,824.2C142.5,826.5 150.0,839.2 150.0,840.0C150.0,840.4 151.3,842.5 152.8,844.6C154.3,846.7 157.1,851.2 159.0,854.5C165.2,865.6 166.1,865.7 164.4,855.2ZM178.0,850.5C177.1,849.4 176.4,849.2 175.7,849.9C175.0,850.6 175.1,851.4 176.0,852.5C176.9,853.6 177.6,853.8 178.3,853.1C179.0,852.4 178.9,851.6 178.0,850.5ZM217.1,824.8C214.9,818.6 204.4,791.4 203.0,788.5C200.7,783.5 198.4,777.9 195.6,770.1C191.1,757.9 190.0,758.3 190.1,772.2C190.3,790.2 194.9,801.2 208.9,817.6C210.9,819.9 213.7,823.6 215.2,825.9C218.9,831.3 219.3,831.1 217.1,824.8ZM221.1,809.9C219.5,793.7 213.2,777.7 202.9,763.4C194.2,751.5 192.8,753.1 199.5,767.5C201.3,771.4 203.5,776.3 204.4,778.5C205.3,780.7 206.7,783.6 207.5,785.0C208.2,786.4 209.3,789.5 210.0,792.0C210.7,794.5 212.7,799.8 214.6,803.8C216.5,807.8 218.0,811.4 218.0,811.7C218.0,813.1 221.3,821.0 221.7,820.7C221.9,820.4 221.6,815.6 221.1,809.9ZM167.1,786.8C166.0,783.7 166.5,721.3 167.8,710.5C168.4,705.5 169.4,696.1 170.0,689.5C171.1,677.7 173.1,664.3 174.9,656.5C176.5,649.7 178.0,640.5 178.0,637.1C178.0,635.3 178.7,631.1 179.5,627.7C190.9,580.4 196.7,559.5 203.0,542.5C203.5,541.4 204.6,538.2 205.5,535.5C207.2,530.8 215.1,509.8 216.9,505.5C217.4,504.4 220.3,498.1 223.3,491.4C226.4,484.8 229.8,477.1 230.9,474.4C232.0,471.7 234.3,466.8 236.0,463.5C237.8,460.2 240.1,455.7 241.2,453.5C243.2,449.2 243.6,448.6 248.9,439.5C250.8,436.2 253.5,431.2 255.0,428.5C256.4,425.8 259.1,421.0 261.1,418.0C263.1,415.0 266.1,410.2 267.9,407.4C269.6,404.6 272.0,401.2 273.2,399.9C274.3,398.6 276.9,395.0 278.8,392.0C287.0,379.3 308.8,349.8 314.3,344.0C315.1,343.2 319.0,338.7 322.9,334.0C335.2,319.3 338.1,316.2 355.2,299.1C379.7,274.7 402.7,254.2 416.8,244.2C419.4,242.4 421.9,240.3 422.5,239.7C423.6,238.4 430.4,233.2 433.1,231.5C434.0,230.9 437.3,228.7 440.5,226.5C443.7,224.3 447.7,221.6 449.5,220.5C451.2,219.4 455.5,216.4 459.1,213.9C462.6,211.4 468.9,207.4 473.0,204.9C477.1,202.5 482.3,199.3 484.4,197.8C486.5,196.3 488.7,195.0 489.3,195.0C490.1,195.0 501.8,188.6 513.0,182.0C515.8,180.4 539.8,169.1 544.7,167.1C547.3,166.0 553.3,163.5 558.0,161.5C562.7,159.5 569.6,156.7 573.5,155.3C577.4,153.9 582.8,151.7 585.5,150.5C588.2,149.2 593.6,147.2 597.5,146.0C609.1,142.3 622.4,137.9 624.5,137.0C627.9,135.6 672.9,125.2 687.0,122.5C691.1,121.8 696.8,120.6 699.5,120.0C712.2,117.2 727.9,115.6 729.4,117.0C733.0,119.9 730.4,122.1 722.4,123.1C703.0,125.3 691.0,127.0 686.0,128.3C683.0,129.1 675.7,130.7 669.9,131.9C664.0,133.1 654.3,135.3 648.4,136.9C642.4,138.5 635.2,140.3 632.5,141.0C602.6,148.5 539.7,173.8 510.5,190.1C505.0,193.1 499.8,195.9 498.9,196.2C498.0,196.6 492.0,200.2 485.5,204.4C479.0,208.6 473.3,212.0 472.8,212.0C471.3,212.0 452.0,225.2 452.0,226.2C452.0,226.7 450.8,227.6 449.2,228.3C443.7,230.7 428.4,241.8 413.2,254.5C409.2,257.8 404.5,261.5 402.8,262.7C393.0,269.9 378.5,283.4 356.5,306.0C335.1,328.0 316.8,348.4 313.6,353.9C313.1,354.8 309.7,359.1 306.1,363.4C302.5,367.8 297.9,373.7 296.0,376.6C294.1,379.5 289.7,385.8 286.3,390.7C276.8,404.1 263.0,424.9 263.0,425.8C263.0,426.2 262.0,428.1 260.7,430.0C253.9,440.6 231.0,485.6 231.0,488.4C231.0,489.1 230.3,490.3 229.5,491.0C228.7,491.7 228.0,493.5 228.0,495.0C228.0,496.5 227.2,498.8 226.1,500.1C224.0,502.8 216.0,521.5 216.0,523.7C216.0,524.5 214.3,529.5 212.1,534.8C207.0,547.7 201.6,563.8 198.1,577.0C196.9,581.1 194.9,588.2 193.5,592.8C192.2,597.4 190.5,604.2 189.9,607.8C188.9,614.2 186.9,623.1 185.0,629.5C184.5,631.1 183.4,637.4 182.5,643.4C181.6,649.3 180.5,656.1 180.0,658.4C178.6,665.0 177.0,676.7 177.0,681.0C177.0,683.1 176.6,685.9 176.1,687.2C174.6,691.0 172.9,721.7 172.4,755.4C172.1,773.0 171.7,787.7 171.4,788.2C170.4,789.8 167.9,789.0 167.1,786.8ZM277.9,762.5C279.4,760.9 282.9,757.6 285.6,755.3C304.4,739.5 310.4,733.6 315.3,726.5C316.8,724.4 317.5,724.1 318.6,725.1C319.9,726.2 320.3,725.9 319.8,724.2C319.6,723.8 319.2,723.6 318.8,723.8C317.7,724.1 317.8,722.6 318.9,721.5C319.4,720.9 322.6,715.3 326.0,709.0C329.4,702.7 333.5,695.8 335.2,693.7C343.5,683.2 329.6,692.4 315.0,707.0C309.2,712.8 302.9,719.6 301.0,722.2C299.1,724.7 295.0,730.1 291.9,734.2C286.5,741.3 282.3,748.1 274.6,762.2C270.6,769.7 270.0,771.8 273.1,768.0C274.2,766.6 276.4,764.1 277.9,762.5ZM270.4,763.9C270.1,763.4 269.4,763.2 268.9,763.6C267.3,764.6 274.8,750.2 280.5,741.5C283.3,737.1 286.8,731.7 288.2,729.5C293.1,721.8 299.1,715.8 300.6,717.1C301.4,717.7 302.0,718.0 302.0,717.6C302.0,716.0 301.7,715.5 300.9,715.8C298.8,716.3 302.2,712.0 308.7,705.7C318.6,696.2 321.8,693.5 328.7,688.8C336.3,683.6 336.2,683.4 326.8,686.4C317.6,689.4 310.7,692.8 305.2,697.2C302.9,699.0 299.0,702.0 296.6,703.8C288.1,709.9 278.8,725.1 273.6,741.5C267.0,762.4 266.8,763.1 268.0,764.5C269.3,766.1 271.4,765.5 270.4,763.9ZM273.3,737.8C273.0,737.2 272.1,737.5 271.3,738.3C270.4,739.2 270.1,740.3 270.5,741.1C271.1,742.0 271.6,741.9 272.6,740.5C273.3,739.5 273.7,738.3 273.3,737.8ZM191.2,723.7C189.2,721.4 187.9,713.0 188.9,709.6C189.4,707.9 190.6,699.3 191.5,690.5C193.8,668.2 194.1,666.5 196.4,666.5C199.3,666.5 199.8,670.2 198.4,681.0C197.8,686.2 196.7,697.9 196.0,707.0C194.6,726.0 194.2,727.4 191.2,723.7ZM319.4,701.1C320.6,699.8 320.8,699.0 320.0,698.5C318.7,697.7 314.8,700.9 315.6,702.1C316.4,703.5 317.5,703.2 319.4,701.1ZM222.1,656.1C220.7,653.6 220.7,650.0 222.0,650.0C222.9,650.0 223.4,651.3 223.1,653.5C223.1,654.0 224.2,655.0 225.5,655.7C230.0,657.8 227.8,644.3 222.5,637.3C221.0,635.5 220.3,634.0 220.9,634.0C221.4,634.0 222.2,634.5 222.5,635.0C222.9,635.6 223.6,635.8 224.1,635.4C224.6,635.1 224.8,634.4 224.4,633.9C224.1,633.4 223.4,633.2 222.9,633.6C222.4,633.9 222.1,633.6 222.2,632.8C222.4,632.1 221.8,631.5 221.0,631.5C220.2,631.5 219.6,632.1 219.8,632.8C219.9,633.4 219.3,634.0 218.5,634.0C217.3,634.0 217.2,634.9 217.6,638.4C218.3,643.3 216.8,645.3 214.8,642.0C212.7,638.7 212.0,639.7 212.0,645.5C212.0,653.2 216.0,660.6 221.0,662.2C222.9,662.8 223.6,658.9 222.1,656.1ZM266.9,639.3C269.1,635.2 268.3,631.6 265.0,630.3C263.4,629.7 262.0,628.5 262.0,627.6C262.0,624.8 258.2,628.0 256.0,632.7C253.2,638.7 253.2,642.0 256.0,639.5C258.8,637.0 260.5,638.7 259.0,642.5C256.3,649.6 262.8,646.9 266.9,639.3ZM209.5,606.5C209.2,605.7 208.8,604.4 208.6,603.6C207.9,601.5 211.5,585.6 214.4,577.3C215.8,573.3 217.0,569.1 217.0,568.0C217.0,566.8 217.8,563.8 218.9,561.2C219.9,558.6 221.5,553.8 222.5,550.5C224.1,544.8 225.5,541.4 230.1,531.2C231.1,528.9 232.0,526.4 232.0,525.7C232.0,522.2 253.7,474.5 261.0,462.0C263.1,458.4 265.6,453.4 266.6,450.9C267.6,448.5 269.4,445.2 270.7,443.7C272.0,442.1 273.0,440.4 273.0,440.0C273.0,437.6 303.2,391.5 311.6,380.9C313.2,378.9 315.5,376.0 316.8,374.3C322.9,366.3 337.3,348.1 339.8,345.5C347.4,336.9 369.1,314.2 373.4,310.1C376.1,307.6 381.7,302.1 385.9,297.9C391.9,292.0 416.3,270.6 421.5,266.8C422.1,266.4 424.6,264.3 427.1,262.3C437.9,253.5 444.0,248.9 451.4,243.9C464.9,234.6 476.3,227.2 480.5,224.9C482.7,223.7 486.1,221.5 488.1,219.9C490.1,218.3 492.2,217.0 492.7,217.0C493.2,217.0 496.3,215.4 499.6,213.4C506.6,209.1 550.0,186.9 555.0,185.1C561.2,182.8 575.4,176.8 578.5,175.3C582.5,173.2 610.1,163.6 622.5,159.9C648.3,152.2 648.5,152.2 661.0,148.9C665.7,147.7 671.3,146.5 673.5,146.3C675.7,146.1 678.9,145.5 680.5,145.0C682.1,144.5 686.3,143.8 689.7,143.5C693.7,143.0 696.4,142.2 697.5,141.0C702.2,135.8 709.1,136.7 710.6,142.6C712.1,148.6 707.1,152.1 699.7,150.1C694.9,148.8 686.0,149.7 671.0,153.0C665.8,154.1 659.5,155.5 657.0,156.0C652.9,156.9 647.6,158.4 628.5,163.8C615.0,167.7 599.5,173.2 596.0,175.3C594.1,176.5 591.4,177.6 590.0,177.8C585.0,178.5 547.7,194.0 542.3,197.7C540.4,199.0 538.5,200.0 537.9,200.0C535.4,200.0 504.2,216.8 494.6,223.4C491.3,225.6 486.2,228.7 483.1,230.2C474.6,234.5 451.4,250.2 438.5,260.5C436.9,261.8 431.9,265.7 427.5,269.2C423.1,272.7 418.4,276.3 417.1,277.3C412.9,280.2 401.0,291.0 387.9,304.0C380.9,310.9 373.5,318.1 371.4,320.2C364.8,326.4 345.2,347.3 342.8,350.7C339.3,355.6 328.3,369.3 326.0,371.5C324.9,372.7 324.0,373.8 324.0,374.1C324.0,374.5 322.4,376.4 320.5,378.4C316.9,382.2 310.7,390.9 308.0,395.8C307.1,397.4 305.4,399.7 304.2,401.1C302.9,402.4 300.9,405.1 299.8,407.0C298.6,408.9 295.3,414.2 292.4,418.6C289.4,423.1 287.0,427.0 287.0,427.4C287.0,427.8 285.9,429.6 284.6,431.3C278.8,438.9 267.0,460.9 255.7,485.0C245.0,507.8 243.0,512.2 243.0,512.9C243.0,513.3 240.5,519.7 237.4,527.1C234.3,534.5 231.4,542.3 231.0,544.5C229.9,550.2 228.3,555.0 226.9,556.6C224.4,559.6 216.5,588.6 215.5,598.5C214.6,607.0 211.1,611.7 209.5,606.5ZM252.0,605.2C257.4,593.8 258.7,573.0 254.0,573.0C253.0,573.0 252.8,574.1 250.5,590.0C249.7,595.8 248.7,602.2 248.4,604.2C247.6,608.9 250.0,609.5 252.0,605.2ZM243.0,604.8C243.5,603.5 244.7,597.5 245.5,591.5C246.4,585.5 247.4,579.0 247.7,577.1C248.3,573.8 248.2,573.7 246.1,575.2C240.1,579.4 236.7,592.0 239.0,601.6C240.4,607.4 241.5,608.3 243.0,604.8ZM238.3,583.0C238.6,581.9 238.4,580.8 238.0,580.5C236.8,579.8 234.7,583.7 235.5,585.0C236.4,586.4 237.6,585.5 238.3,583.0ZM1372.5,536.0C1371.4,533.8 1370.5,533.1 1369.8,533.8C1369.2,534.4 1369.4,535.8 1370.5,538.0C1371.6,540.2 1372.5,540.9 1373.2,540.2C1373.8,539.6 1373.6,538.2 1372.5,536.0ZM330.2,329.8C328.6,328.2 326.5,330.2 327.4,332.6C328.0,334.2 328.2,334.2 329.7,332.7C331.0,331.4 331.1,330.8 330.2,329.8ZM795.9,198.7C792.6,196.2 794.1,183.0 797.6,184.2C799.7,184.9 799.1,178.2 796.7,175.4C792.7,170.6 792.6,168.7 796.0,165.2C798.8,162.2 799.0,161.8 797.7,159.2C796.9,157.7 796.0,154.8 795.6,152.7C795.1,150.3 793.7,147.6 791.7,145.7C789.4,143.5 788.5,141.7 788.4,138.8C788.2,135.5 787.4,134.1 783.6,130.4C781.1,128.0 779.0,125.6 779.0,125.2C779.0,124.2 767.0,118.0 765.1,118.0C763.0,118.0 758.9,114.7 757.4,111.8C755.8,108.7 755.9,108.4 760.4,102.6C762.7,99.8 770.4,99.2 773.8,101.7C779.0,105.6 781.2,106.3 782.2,104.9C782.9,103.9 783.0,104.4 782.5,106.4C782.1,108.2 782.4,109.8 783.3,110.9C786.5,114.7 792.3,132.4 790.1,131.8C789.3,131.5 789.0,132.0 789.0,133.6C789.0,134.0 789.7,133.7 790.5,133.0C791.7,132.0 792.3,132.4 794.0,135.2C796.4,139.1 796.5,137.9 794.6,128.5C792.8,119.0 788.1,105.9 785.8,103.7C784.1,102.1 784.1,101.7 785.5,99.7C786.3,98.5 787.0,97.0 787.0,96.2C787.0,94.4 791.9,84.2 793.9,81.7C800.2,74.0 800.7,73.8 804.9,79.0C812.3,88.2 817.1,104.1 813.5,107.6C812.7,108.4 811.8,110.7 811.5,112.8C811.2,114.8 810.4,117.4 809.8,118.5C808.7,120.4 807.8,124.4 806.5,134.0L805.9,138.5L807.9,134.5C810.5,128.9 815.0,114.6 815.0,111.6C815.0,109.7 815.4,109.2 816.6,109.7C817.6,110.1 819.2,109.0 821.2,106.6C828.3,97.9 838.0,97.5 843.0,105.6C846.5,111.1 843.3,115.3 833.1,118.5C829.9,119.5 821.0,125.9 821.0,127.2C821.0,127.8 819.0,130.0 816.6,132.1C814.0,134.4 811.6,137.6 810.9,139.8C810.3,141.8 809.4,143.9 809.0,144.5C808.5,145.1 807.9,147.8 807.5,150.5C807.2,153.2 806.7,156.5 806.4,157.8C805.8,160.7 808.9,160.8 811.5,158.0C812.5,156.9 813.0,156.0 812.6,156.0C811.6,156.0 816.3,152.2 824.0,146.8C835.1,139.1 840.5,138.1 857.6,140.6C865.9,141.8 863.2,134.0 854.1,130.4C847.2,127.6 835.9,130.0 830.0,135.5C826.0,139.2 821.0,141.4 821.0,139.5C821.0,137.1 831.2,126.2 833.5,126.1C834.6,126.0 836.6,125.3 837.8,124.4C840.9,122.3 849.9,121.5 855.5,122.9C869.8,126.5 874.3,138.8 864.0,145.8C860.4,148.2 859.2,148.3 848.8,146.4C840.7,145.0 830.8,150.5 835.2,154.0C840.4,158.0 836.2,164.7 831.0,160.8C824.3,155.9 809.1,161.5 809.0,169.0C809.0,169.8 807.6,172.3 806.0,174.4C802.3,179.3 802.2,183.2 805.5,187.2C811.8,194.6 803.5,204.5 795.9,198.7ZM1085.6,181.5C1083.0,179.5 1081.5,180.8 1083.6,183.1C1084.9,184.5 1085.7,184.7 1086.4,184.0C1087.2,183.2 1087.0,182.5 1085.6,181.5ZM602.3,171.3C602.7,171.0 602.6,170.2 601.9,169.4C601.0,168.3 600.4,168.3 599.4,169.1C598.6,169.7 598.0,169.9 598.0,169.6C598.0,169.2 597.5,169.2 597.0,169.5C593.8,171.5 598.9,173.1 602.3,171.3ZM787.6,162.0C783.1,158.6 780.1,158.3 773.4,160.6C766.3,163.0 764.7,161.4 767.5,154.7C768.0,153.4 767.8,153.1 766.8,153.5C765.8,153.9 764.9,153.1 764.0,151.1C762.4,147.1 760.6,146.7 749.1,147.5L739.5,148.1L735.8,145.0C723.3,134.6 749.9,112.9 762.7,123.0C764.1,124.1 765.9,125.0 766.6,125.0C767.4,125.0 768.0,125.4 768.0,125.8C768.0,126.2 769.2,127.3 770.8,128.2C777.4,132.2 784.3,141.0 780.8,141.0C778.1,141.0 775.0,139.7 775.6,138.9C775.9,138.4 775.4,138.0 774.6,138.0C773.7,138.0 773.0,137.6 773.0,137.0C773.0,136.4 772.3,136.0 771.5,136.0C770.7,136.0 769.1,134.9 767.8,133.7C761.1,126.9 740.0,129.8 740.0,137.6C740.0,139.9 741.7,140.1 756.6,140.1C764.7,140.1 770.8,140.5 770.5,141.0C770.0,141.8 773.7,143.6 775.2,143.2C775.7,143.1 776.0,143.5 776.0,144.0C776.0,144.6 776.8,145.4 777.8,145.8C781.2,147.2 794.0,161.9 794.0,164.4C794.0,165.8 791.2,164.7 787.6,162.0ZM814.3,157.9C813.5,157.1 812.9,157.3 812.1,158.8C810.8,161.3 811.9,162.5 813.9,160.5C815.0,159.4 815.1,158.7 814.3,157.9ZM781.0,116.0C779.9,113.8 778.5,112.0 777.9,112.0C777.3,112.0 775.5,110.7 774.0,109.0C771.1,105.9 768.0,105.0 768.0,107.2C768.0,109.4 779.5,119.7 782.3,119.9C782.7,120.0 782.1,118.2 781.0,116.0ZM829.1,113.0C833.8,108.5 834.7,106.0 831.6,106.0C829.6,106.0 823.2,112.5 822.5,115.3C821.4,119.3 823.4,118.7 829.1,113.0ZM800.0,110.7C800.0,108.9 799.6,106.1 799.2,104.5C798.7,102.8 798.5,100.9 798.7,100.2C799.6,97.7 800.8,99.1 801.5,103.2C803.0,112.7 804.2,113.1 806.0,104.5C806.9,100.3 806.9,98.1 806.0,95.4C804.7,91.6 802.7,91.3 802.2,94.8C802.0,96.0 801.4,97.0 800.9,97.0C799.6,97.0 797.7,91.8 798.8,91.1C799.6,90.6 800.1,87.0 799.4,87.0C795.4,87.0 794.0,109.5 797.8,110.8C798.4,111.0 798.5,112.0 798.2,113.2C797.9,114.6 798.1,115.1 798.8,114.6C799.5,114.2 800.0,112.4 800.0,110.7Z"/></symbol>
+  <symbol id="i-rings" viewBox="0 0 24 24"><circle cx="9" cy="14.5" r="5"/><circle cx="15" cy="14.5" r="5"/><path d="M12 3.5v3M10.5 5h3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 10-13 0c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 100 17c1.4 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a3.5 3.5 0 003.5-3.5C20.5 7 16.8 3.5 12 3.5z"/><circle cx="8" cy="11" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0112 7.6 4.3 4.3 0 0119.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 119.5 4a7 7 0 0010.5 10.5z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-7z"/></symbol>
+</svg>
+
+<div id="progress"></div>
+
+<audio id="bg-music" loop preload="none">
+  <source src="musica.mp3" type="audio/mpeg">
+</audio>
+<button type="button" id="music-toggle" aria-label="Activar música" aria-pressed="false"><svg class="ico"><use href="#i-note"/></svg></button>
+
+<div id="loading">
+  <div class="leaf-spin"></div>
+  <p>Preparando tu invitación…</p>
+</div>
+
+<div id="notfound">
+  <p>No encontramos tu invitación.<br>Verifica el enlace o escríbenos.</p>
+</div>
+
+<div id="envelope-screen" aria-label="Abriendo tu invitación">
+  <div class="env-branch env-branch-1">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 10 C 40 20, 55 45, 60 80 C 63 105, 55 130, 40 150" stroke="#7C9473" stroke-width="2" stroke-linecap="round"/>
+        <path d="M18 30 C 30 26, 42 30, 46 42 C 40 44, 30 42, 18 30 Z" fill="#A9BE9E" opacity="0.8"/>
+        <path d="M28 55 C 42 48, 56 52, 62 64 C 54 68, 40 66, 28 55 Z" fill="#7C9473" opacity="0.75"/>
+        <path d="M40 85 C 55 80, 68 86, 72 98 C 63 101, 49 98, 40 85 Z" fill="#A9BE9E" opacity="0.7"/>
+        <circle cx="52" cy="35" r="4" fill="#B08A4E" opacity="0.7"/>
+        <circle cx="66" cy="70" r="3" fill="#B08A4E" opacity="0.6"/>
+      </svg>
+  </div>
+  <div class="env-branch env-branch-2">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 10 C 40 20, 55 45, 60 80 C 63 105, 55 130, 40 150" stroke="#7C9473" stroke-width="2" stroke-linecap="round"/>
+        <path d="M18 30 C 30 26, 42 30, 46 42 C 40 44, 30 42, 18 30 Z" fill="#A9BE9E" opacity="0.8"/>
+        <path d="M28 55 C 42 48, 56 52, 62 64 C 54 68, 40 66, 28 55 Z" fill="#7C9473" opacity="0.75"/>
+        <path d="M40 85 C 55 80, 68 86, 72 98 C 63 101, 49 98, 40 85 Z" fill="#A9BE9E" opacity="0.7"/>
+        <circle cx="52" cy="35" r="4" fill="#B08A4E" opacity="0.7"/>
+        <circle cx="66" cy="70" r="3" fill="#B08A4E" opacity="0.6"/>
+      </svg>
+  </div>
+  <div class="petals" id="petals-env"></div>
+  <p class="env-eyebrow">Tienes una invitación especial</p>
+  <div class="envelope-scene">
+    <div class="envelope" id="envelope">
+      <div class="env-letter">
+        <div class="mini" aria-hidden="true">
+          <svg class="insignia mini-ins"><use href="#insignia"/></svg>
+          <p class="mini-eyebrow">Nos casamos</p>
+          <p class="mini-names">María del Mar<span>&amp;</span>Faiber</p>
+          <div class="mini-orn"><i></i><b></b><i></i></div>
+          <p class="mini-date">19 · 02 · 2027</p>
+          <div class="mini-photo"><img src="fotos/novios.jpg" alt=""></div>
+          <svg class="mini-wave" viewBox="0 0 1440 150" preserveAspectRatio="none"><path class="b" d="M0,70 C220,10 470,130 740,72 S1200,6 1440,66 L1440,150 L0,150 Z"/><path class="f" d="M0,100 C260,52 520,150 780,102 S1220,50 1440,98 L1440,150 L0,150 Z"/></svg>
+        </div>
+      </div>
+      <div class="env-base"></div>
+      <div class="env-side env-side-left"></div>
+      <div class="env-side env-side-right"></div>
+      <div class="env-bottom"></div>
+      <div class="env-address">
+        <span class="line"><span class="to">Para</span><span class="name" id="env-guest-name"></span></span>
+        <span class="with" id="env-guest-with"></span>
+      </div>
+      <div class="env-flap"></div>
+      <div class="env-seal"><svg class="insignia" role="img" aria-label="Insignia M y F"><use href="#insignia"/></svg></div>
+    </div>
+  </div>
+  <p class="env-hint">Abriendo tu invitación…</p>
+</div>
+
+<div id="app">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero" id="hero">
+    <div class="branch hero-branch-top">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 10 C 40 20, 55 45, 60 80 C 63 105, 55 130, 40 150" stroke="#7C9473" stroke-width="2" stroke-linecap="round"/>
+        <path d="M18 30 C 30 26, 42 30, 46 42 C 40 44, 30 42, 18 30 Z" fill="#A9BE9E" opacity="0.8"/>
+        <path d="M28 55 C 42 48, 56 52, 62 64 C 54 68, 40 66, 28 55 Z" fill="#7C9473" opacity="0.75"/>
+        <path d="M40 85 C 55 80, 68 86, 72 98 C 63 101, 49 98, 40 85 Z" fill="#A9BE9E" opacity="0.7"/>
+        <circle cx="52" cy="35" r="4" fill="#B08A4E" opacity="0.7"/>
+        <circle cx="66" cy="70" r="3" fill="#B08A4E" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="petals" id="petals-hero"></div>
+
+    <div class="hero-text">
+      <svg class="insignia hero-insignia st" role="img" aria-label="Insignia M y F" style="--d:.05s"><use href="#insignia"/></svg>
+      <p class="eyebrow-invite st" style="--d:.15s">Nos casamos</p>
+
+      <h1 class="couple-names">
+        <span class="n st" style="--d:.6s">María del Mar</span>
+        <span class="amp st" style="--d:.8s">&amp;</span>
+        <span class="n st" style="--d:1s">Faiber</span>
+      </h1>
+
+      <div class="ornament st" style="--d:1.25s"><i></i><b></b><i></i></div>
+      <p class="wedding-date st" style="--d:1.4s">19 <span>·</span> 02 <span>·</span> 2027</p>
+    </div>
+
+    <div class="hero-photo protect">
+      <div class="hero-photo-inner"><img src="fotos/novios.jpg" alt="Ilustración de María del Mar y Faiber" draggable="false"></div>
+    </div>
+
+    <svg class="ico scroll-hint st" style="--d:2.4s" aria-hidden="true"><use href="#i-chev"/></svg>
+
+    <div class="hero-waves" aria-hidden="true">
+      <svg class="wave wave-back" viewBox="0 0 1440 150" preserveAspectRatio="none"><path d="M0,70 C220,10 470,130 740,72 S1200,6 1440,66 L1440,150 L0,150 Z"/></svg>
+      <svg class="wave wave-line" viewBox="0 0 1440 150" preserveAspectRatio="none"><path d="M0,92 C250,42 500,142 760,92 S1210,38 1440,86"/></svg>
+      <svg class="wave wave-front" viewBox="0 0 1440 150" preserveAspectRatio="none"><path d="M0,100 C260,52 520,150 780,102 S1220,50 1440,98 L1440,150 L0,150 Z"/></svg>
+    </div>
+  </header>
+
+  <!-- ===== CUENTA REGRESIVA ===== -->
+  <section class="count-sec">
+    <div class="wrap section-inner">
+      <p class="countdown-label rv">Faltan</p>
+      <div class="countdown rv" id="countdown" style="--d:.12s">
+        <div class="unit"><span class="num" id="cd-days">00</span><span class="label">días</span></div>
+        <div class="unit"><span class="num" id="cd-hours">00</span><span class="label">horas</span></div>
+        <div class="unit"><span class="num" id="cd-mins">00</span><span class="label">min</span></div>
+        <div class="unit"><span class="num" id="cd-secs">00</span><span class="label">seg</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INVITADOS ===== -->
+  <section class="sec" id="invitados">
+    <svg class="golden" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path pathLength="1" d="M-40,170 C 180,60 380,250 620,150 S 1000,60 1240,170"/>
+      <path pathLength="1" d="M-40,120 C 220,230 420,40 660,140 S 1020,230 1240,110"/>
+    </svg>
+    <div class="wrap section-inner">
+      <div class="guest-badge rv-zoom" id="badge-count">1</div>
+      <h2 class="guest-title rv" id="badge-label" style="--d:.1s">INVITADO</h2>
+      <div class="guest-list" id="guest-list"></div>
+      <p class="message rv" id="mensaje-personalizado" style="--d:.2s">—</p>
+    </div>
+  </section>
+
+  <!-- ===== FECHA Y LUGAR ===== -->
+  <section class="sec alt" id="detalles">
+    <div class="wrap section-inner">
+      <div class="ico-wrap big rv-zoom"><svg class="ico"><use href="#i-rings"/></svg></div>
+      <p class="eyebrow rv" style="--d:.1s">La celebración</p>
+      <h2 class="card-title rv" style="--d:.16s">Ceremonia y recepción</h2>
+      <p class="card-sub rv" style="--d:.22s">Compartiremos el momento más especial en un mismo lugar, rodeados de naturaleza y de quienes más queremos.</p>
+
+      <div class="tiles">
+        <div class="tile rv" style="--d:.05s">
+          <div class="ico-wrap"><svg class="ico"><use href="#i-cal"/></svg></div>
+          <h3>Fecha</h3>
+          <p>Viernes<br>19 de febrero</p>
+          <small>2027</small>
+        </div>
+        <div class="tile rv" style="--d:.15s">
+          <div class="ico-wrap"><svg class="ico"><use href="#i-clock"/></svg></div>
+          <h3>Hora</h3>
+          <p>3:00 p.m.</p>
+          <small>Hora de Colombia</small>
+        </div>
+        <div class="tile rv" style="--d:.25s">
+          <div class="ico-wrap"><svg class="ico"><use href="#i-pin"/></svg></div>
+          <h3>Lugar</h3>
+          <p>Hacienda Marroquín</p>
+          <small>Chía, Cundinamarca</small>
+        </div>
+      </div>
+
+      <div class="map-frame rv-zoom">
+        <iframe class="map-embed" loading="lazy"
+          src="https://www.google.com/maps?q=Hacienda+Marroqu%C3%ADn+Ch%C3%ADa&output=embed"
+          title="Ubicación Hacienda Marroquín"></iframe>
+      </div>
+
+      <div class="actions rv" style="--d:.1s">
+        <a class="btn solid" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/place/HACIENDA+MARROQU%C3%8DN/@4.8638972,-74.0264387,16.87z/data=!4m6!3m5!1s0x8e3f8900076cb21b:0xdbdc61a72808e195!8m2!3d4.863978!4d-74.0237395!16s%2Fg%2F11mdw6zv98">
+          <svg class="ico"><use href="#i-pin"/></svg> Cómo llegar
+        </a>
+        <a class="btn soft" target="_blank" rel="noopener"
+           href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda%20de%20Mar%C3%ADa%20del%20Mar%20%26%20Faiber&dates=20270219T200000Z/20270220T010000Z&location=Hacienda%20Marroqu%C3%ADn%2C%20Ch%C3%ADa&details=Nos%20casamos%20y%20queremos%20celebrarlo%20contigo.">
+          <svg class="ico"><use href="#i-cal"/></svg> Google Calendar
+        </a>
+        <button type="button" class="btn soft" id="btn-ics"><svg class="ico"><use href="#i-cal"/></svg> Apple / Outlook (.ics)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DRESS CODE ===== -->
+  <section class="sec" id="dresscode">
+    <div class="wrap section-inner">
+      <div class="dress-card rv-zoom" id="dress-card">
+        <div class="ico-wrap rv-zoom" style="--d:.1s"><svg class="ico"><use href="#i-palette"/></svg></div>
+        <p class="eyebrow">Código de vestimenta</p>
+        <h2 class="card-title">Primavera de colores</h2>
+        <p class="card-sub" style="margin-bottom:22px;">
+          Queremos celebrar este día rodeados de color y alegría. Vístete del color que más te guste
+          y ayúdanos a llenar este momento de tonos vivos, porque queremos que nuestra boda sea
+          tan colorida y especial como este día.
+        </p>
+        <div class="dresscode-palette">
+          <span class="swatch" style="background:#E4572E;"></span>
+          <span class="swatch" style="background:#F3A712;"></span>
+          <span class="swatch" style="background:#5A9367;"></span>
+          <span class="swatch" style="background:#2F6690;"></span>
+          <span class="swatch" style="background:#B0559C;"></span>
+        </div>
+        <div class="looks">
+          <div class="look rv-l" style="--d:.1s">
+            <h3>Mujeres</h3>
+            <p>Vestidos coloridos y elegantes, ¡atrévete a jugar con el color! 🌷✨</p>
+            <figure class="protect"><img src="fotos/dress-mujeres.jpg" alt="Ideas de vestidos coloridos y elegantes" loading="lazy" draggable="false"></figure>
+          </div>
+          <div class="look rv-r" style="--d:.2s">
+            <h3>Hombres</h3>
+            <p>Pueden usar el traje que ya tengan. Si quieren darle un toque divertido, pueden hacerlo con una corbata, pañuelo o algún detalle de color.</p>
+            <figure class="protect"><img src="fotos/dress-hombres.jpg" alt="Ideas de trajes con toques de color" loading="lazy" draggable="false"></figure>
+          </div>
+        </div>
+        <p class="looks-note">Algunas ideas de inspiración</p>
+        <div class="avoid">
+          <p>Te pedimos evitar</p>
+          <div class="dresscode-palette">
+            <span class="swatch" style="background:#FFFFFF;"></span>
+            <span class="swatch" style="background:#E8DFC8;"></span>
+            <span class="swatch" style="background:#C3B091;"></span>
+          </div>
+          <p style="margin:12px 0 0; letter-spacing:.04em; text-transform:none; font-size:.84rem;">Blanco, beige y caqui</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RSVP ===== -->
+  <section class="sec alt" id="rsvp">
+    <svg class="golden" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path pathLength="1" d="M-40,190 C 200,260 420,70 640,160 S 1000,250 1240,140"/>
+      <path pathLength="1" d="M-40,130 C 240,40 440,240 680,150 S 1040,60 1240,170"/>
+    </svg>
+    <div class="wrap section-inner">
+      <p class="eyebrow rv">Tu respuesta</p>
+      <h2 class="card-title rv" style="--d:.08s">Confirma tu asistencia</h2>
+      <p class="card-sub rv" style="--d:.14s">Es importante que nos confirmes para preparar este día con todo el cariño.</p>
+
+      <div class="rsvp-card rv-zoom" id="rsvp-card">
+        <div class="dots" id="rsvp-dots" aria-hidden="true">
+          <span class="dot active" data-step="1"></span>
+          <span class="dot" data-step="2"></span>
+          <span class="dot" data-step="3"></span>
+        </div>
+
+        <form id="rsvp-form" novalidate>
+
+          <div class="step active" data-step="1">
+            <h3 class="step-q">¿Nos acompañarás?</h3>
+            <p class="step-sub">Elige una opción para continuar.</p>
+            <div class="choice-grid">
+              <button type="button" class="choice" data-value="si">
+                <svg class="ico"><use href="#i-heart"/></svg>
+                <b>Sí, ahí estaré</b><small>Será un honor celebrar contigo</small>
+              </button>
+              <button type="button" class="choice" data-value="no">
+                <svg class="ico"><use href="#i-moon"/></svg>
+                <b>No podré asistir</b><small>Te vamos a extrañar</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="step" data-step="2">
+            <h3 class="step-q">Cuéntanos un poco más</h3>
+            <p class="step-sub">Para que todo salga perfecto.</p>
+
+            <div class="field" id="companions-block">
+              <label id="companions-label">Número de acompañantes</label>
+              <div class="who-list" id="who-list" style="display:none"></div>
+              <div class="stepper" id="comp-stepper">
+                <button type="button" id="comp-minus" aria-label="Menos acompañantes">−</button>
+                <output id="comp-val">0</output>
+                <button type="button" id="comp-plus" aria-label="Más acompañantes">+</button>
+              </div>
+              <input type="hidden" id="num_acompanantes" value="0">
+              <p class="hint" id="comp-hint"></p>
+            </div>
+
+            <div class="field">
+              <label for="restricciones">Alergias o restricciones alimentarias</label>
+              <textarea id="restricciones" name="restricciones" rows="2" placeholder="Ej. vegetariano, sin gluten, ninguna"></textarea>
+              <p class="hint" id="restr-hint" style="display:none">Si es de alguien de tu grupo, escribe su nombre. Ej. “Ana: vegetariana”.</p>
+            </div>
+
+            <div class="field">
+              <label for="cancion">Una canción que no puede faltar</label>
+              <input type="text" id="cancion" name="cancion" placeholder="Ej. Perfect - Ed Sheeran">
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn ghost" data-back>Atrás</button>
+              <button type="button" class="btn solid" data-next>Continuar</button>
+            </div>
+          </div>
+
+          <div class="step" data-step="3">
+            <h3 class="step-q">Un mensaje para nosotros</h3>
+            <p class="step-sub">Opcional, pero nos encantará leerlo.</p>
+            <div class="field">
+              <textarea id="comentario" name="comentario" placeholder="Déjanos un mensaje…"></textarea>
+            </div>
+            <ul class="summary" id="summary"></ul>
+            <div class="step-nav">
+              <button type="button" class="btn ghost" data-back>Atrás</button>
+              <button type="submit" class="btn solid" id="submit-btn">Confirmar asistencia</button>
+            </div>
+            <p class="form-note">Puedes confirmar hasta el 15 de enero de 2027.</p>
+          </div>
+
+        </form>
+
+        <div class="result" id="already-confirmed">
+          <svg class="check-anim" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" pathLength="1"/><path d="M15 27l8 8 14-16" pathLength="1"/></svg>
+          <p id="already-confirmed-msg">Ya confirmaste tu asistencia. ¡Gracias!</p>
+          <p class="who-confirmed" id="already-confirmed-who"></p>
+          <small>Si necesitas cambiar tu respuesta, escríbenos directamente.</small>
+        </div>
+
+        <div class="result" id="rsvp-success">
+          <svg class="check-anim" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" pathLength="1"/><path d="M15 27l8 8 14-16" pathLength="1"/></svg>
+          <p id="rsvp-success-msg">¡Gracias por confirmar! Te esperamos con mucha ilusión.</p>
+          <p class="who-confirmed" id="rsvp-success-who"></p>
+        </div>
+
+        <p class="rsvp-error" id="rsvp-error">Hubo un problema al enviar tu respuesta. Intenta de nuevo en unos segundos.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <svg class="insignia rv-zoom" role="img" aria-label="Insignia M y F"><use href="#insignia"/></svg>
+    <p class="sig rv" style="--d:.15s">Con todo nuestro cariño,<br>María del Mar &amp; Faiber</p>
+    <p class="small rv" style="--d:.25s">19 · 02 · 2027</p>
+  </footer>
+
+</div>
+
+<script>
+  // ======= CONFIG =======
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbwQS9Yz00tj-Gkx3LCOAIRNmfO6TuUU-FoUxEAVTkpQPbB5O5jWedAxgKJACUB0x7W7ZA/exec";
+  const WEDDING_DATE = new Date("2027-02-19T15:00:00-05:00"); // hora Colombia
+
+  const params = new URLSearchParams(window.location.search);
+  const guestId = params.get("id");
+  const $ = (id) => document.getElementById(id);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let permitidos = 0;
+  let acompanantes = [];   // nombres de acompañantes (columna nombre_acompanantes)
+  let asistira = null;
+  let flow = ["1", "2", "3"];
+  let current = "1";
+
+  // ======= Pétalos (ambiente y celebración) =======
+  const PETAL_COLORS = ["#A9BE9E", "#7C9473", "#E4B7B0", "#E3C98D", "#F3E6C8"];
+
+  function spawnPetals(container, count, burst){
+    if (reduce || !container) return;
+    const h = container.offsetHeight + 60;
+    for (let i = 0; i < count; i++){
+      const p = document.createElement("span");
+      p.className = "petal" + (burst ? " burst" : "");
+      p.style.left = (Math.random() * 100) + "%";
+      p.style.setProperty("--s", (8 + Math.random() * 10) + "px");
+      p.style.setProperty("--c", PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)]);
+      p.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+      p.style.setProperty("--h", h + "px");
+      if (burst){
+        p.style.setProperty("--dur", (3 + Math.random() * 2.5) + "s");
+        p.style.setProperty("--dl", (Math.random() * 0.8) + "s");
+        p.addEventListener("animationend", () => p.remove());
+      } else {
+        p.style.setProperty("--dur", (11 + Math.random() * 9) + "s");
+        p.style.setProperty("--dl", (-Math.random() * 18) + "s");
+      }
+      container.appendChild(p);
+    }
+  }
+
+  // ======= Carga del invitado =======
+  // Lista de acompañantes con casillas: una sola respuesta por invitación
+  function buildWhoList(){
+    $("companions-label").textContent = "¿Quiénes te acompañan?";
+    $("comp-stepper").style.display = "none";
+    $("comp-hint").textContent = "Desmarca a quien no pueda asistir.";
+    $("restr-hint").style.display = "";
+    $("restricciones").placeholder = "Ej. Ana: vegetariana. Yo: sin gluten";
+    const list = $("who-list");
+    list.style.display = "";
+    list.textContent = "";
+    acompanantes.forEach((n) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "who on"; b.dataset.name = n;
+      b.setAttribute("aria-pressed", "true");
+      const box = document.createElement("span"); box.className = "box";
+      box.innerHTML = '<svg class="ico"><use href="#i-check"/></svg>';
+      const t = document.createElement("span"); t.textContent = n;
+      b.append(box, t);
+      b.addEventListener("click", () => {
+        const on = b.classList.toggle("on");
+        b.setAttribute("aria-pressed", String(on));
+        $("num_acompanantes").value = attendingNames().length;
+      });
+      list.appendChild(b);
+    });
+    $("num_acompanantes").value = acompanantes.length;
+  }
+  const attendingNames = () => Array.from(document.querySelectorAll("#who-list .who.on")).map((b) => b.dataset.name);
+
+  function showApp(invitado){
+    $("loading").style.display = "none";
+
+    const nombre = invitado.nombre || "";
+    $("env-guest-name").textContent = nombre;
+
+    permitidos = Number(invitado.acompanantes_permitidos) || 0;
+    acompanantes = String(invitado.nombre_acompanantes || "").split(/[,;\n]+/).map((x) => x.trim()).filter(Boolean);
+    if (acompanantes.length > 0) permitidos = acompanantes.length;
+    $("env-guest-with").textContent = acompanantes.length
+      ? "junto a " + (acompanantes.length === 1 ? acompanantes[0]
+          : acompanantes.slice(0, -1).join(", ") + " y " + acompanantes[acompanantes.length - 1])
+      : "";
+
+    // Mensaje personalizado
+    $("mensaje-personalizado").textContent =
+      String(invitado.mensaje_personalizado || "").trim() || "Será un honor celebrar este día junto a ti.";
+
+    // Sección Invitados: nombre + nombre_acompanantes
+    const personas = [nombre, ...acompanantes].filter(Boolean);
+    $("badge-count").textContent = String(Math.max(personas.length, 1));
+    $("badge-label").textContent = personas.length > 1 ? "INVITADOS" : "INVITADO";
+    const lista = $("guest-list");
+    lista.textContent = "";
+    personas.forEach((n, i) => {
+      const c = document.createElement("span");
+      c.className = "gchip";
+      c.style.setProperty("--d", (0.1 + i * 0.12) + "s");
+      c.textContent = n;
+      lista.appendChild(c);
+    });
+
+    // Acompañantes en el formulario
+    if (permitidos === 0){
+      $("companions-block").style.display = "none";
+    } else if (acompanantes.length > 0){
+      buildWhoList();
+    } else {
+      $("companions-label").textContent = "Número de acompañantes";
+      $("comp-hint").textContent = `Puedes traer hasta ${permitidos}.`;
+    }
+
+    // Si ya respondió, no se vuelve a mostrar el formulario.
+    const ya = String(invitado.confirmado || "").trim().toLowerCase();
+    if (ya === "si" || ya === "no"){
+      $("rsvp-form").style.display = "none";
+      $("rsvp-dots").style.display = "none";
+      $("already-confirmed-msg").textContent = ya === "si"
+        ? "Ya confirmaste tu asistencia. ¡Te esperamos con mucha ilusión!"
+        : "Ya nos avisaste que no podrás acompañarnos. ¡Gracias por contarnos!";
+      const prev = invitado.respuesta || {};
+      if (ya === "si" && prev.acompanantes_asistentes){
+        $("already-confirmed-who").textContent = "Te acompañan: " + prev.acompanantes_asistentes;
+      }
+      $("already-confirmed").classList.add("show");
+    }
+
+    if (reduce){
+      revealApp();
+      return;
+    }
+
+    const envelopeScreen = $("envelope-screen");
+    envelopeScreen.classList.add("visible");
+    spawnPetals($("petals-env"), 14, false);
+
+    const envelope = $("envelope");
+    const timers = [];
+    let stage = 0;
+    const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+    // Etapa 1: se abre la solapa y sube la carta. Etapa 2: la carta se amplía hasta llenar la pantalla.
+    const scene = envelopeScreen.querySelector(".envelope-scene");
+    const stage1 = () => {
+      if (stage >= 1) return;
+      stage = 1;
+      envelopeScreen.classList.add("opening-on");
+      envelope.classList.add("opening");
+      later(stage2, 2000);
+    };
+    const stage2 = () => {
+      if (stage >= 2) return;
+      stage = 2;
+      // Calcula hacia dónde y cuánto ampliar: la carta termina centrada y a pantalla completa.
+      const letter = envelope.querySelector(".env-letter");
+      const lr = letter.getBoundingClientRect();
+      const sr = scene.getBoundingClientRect();
+      const cx = lr.left + lr.width / 2, cy = lr.top + lr.height / 2;
+      const zs = Math.min(window.innerWidth / lr.width, window.innerHeight / lr.height);
+      scene.style.transformOrigin = `${cx - sr.left}px ${cy - sr.top}px`;
+      scene.style.setProperty("--zx", (window.innerWidth / 2 - cx) + "px");
+      scene.style.setProperty("--zy", (window.innerHeight / 2 - cy) + "px");
+      scene.style.setProperty("--zs", zs.toFixed(3));
+      envelope.classList.add("pull");
+      envelopeScreen.classList.add("zoom");
+      later(revealApp, 350);
+      later(() => envelopeScreen.classList.remove("visible"), 1700);
+    };
+    later(stage1, 2000);                                   // se abre sola
+    envelopeScreen.addEventListener("click", () => {       // un toque acelera
+      timers.splice(0).forEach(clearTimeout);
+      if (stage === 0) { stage1(); } else { stage2(); }
+    });
+  }
+
+  function revealApp(){
+    const app = $("app");
+    app.style.display = "block";
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => requestAnimationFrame(() => app.classList.add("entered")));
+    $("music-toggle").classList.add("visible");
+    initScrollEffects();
+    spawnPetals($("petals-hero"), 12, false);
+  }
+
+  function showNotFound(){
+    $("loading").style.display = "none";
+    $("notfound").style.display = "flex";
+  }
+
+  async function loadInvitado(){
+    if (!guestId){ showNotFound(); return; }
+    try{
+      const res = await fetch(`${ENDPOINT}?id=${encodeURIComponent(guestId)}`);
+      const data = await res.json();
+      if (data.found){ showApp(data.invitado); } else { showNotFound(); }
+    } catch(err){
+      showNotFound();
+    }
+  }
+  loadInvitado();
+
+  // ======= Efectos de scroll: revelado, progreso y parallax =======
+  function initScrollEffects(){
+    const targets = document.querySelectorAll(".rv, .rv-l, .rv-r, .rv-zoom, .sec, .gchip");
+    if ("IntersectionObserver" in window){
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -6% 0px" });
+      targets.forEach((t) => io.observe(t));
+    } else {
+      targets.forEach((t) => t.classList.add("in"));
+    }
+
+    const bar = $("progress");
+    const hero = $("hero");
+    let ticking = false;
+    const update = () => {
+      const y = window.scrollY || 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+      if (!reduce && y < window.innerHeight * 1.2) hero.style.setProperty("--py", (y * 0.25).toFixed(1));
+      ticking = false;
+    };
+    window.addEventListener("scroll", () => {
+      if (!ticking){ ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+
+  // ======= Cuenta regresiva =======
+  const cdPrev = {};
+  function setNum(id, value){
+    const e = $(id);
+    const txt = String(value).padStart(2, "0");
+    if (e.textContent !== txt){
+      e.textContent = txt;
+      if (cdPrev[id] !== undefined && !reduce){
+        e.classList.remove("tick");
+        void e.offsetWidth;
+        e.classList.add("tick");
+      }
+    }
+    cdPrev[id] = txt;
+  }
+  function tick(){
+    let diff = WEDDING_DATE - new Date();
+    if (diff < 0) diff = 0;
+    setNum("cd-days", Math.floor(diff / 86400000));
+    setNum("cd-hours", Math.floor((diff / 3600000) % 24));
+    setNum("cd-mins", Math.floor((diff / 60000) % 60));
+    setNum("cd-secs", Math.floor((diff / 1000) % 60));
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // ======= RSVP por pasos =======
+  const choices = document.querySelectorAll(".choice");
+  const submitBtn = $("submit-btn");
+
+  function updateDots(){
+    const idx = flow.indexOf(current);
+    document.querySelectorAll("#rsvp-dots .dot").forEach((d) => {
+      const pos = flow.indexOf(d.dataset.step);
+      d.style.display = pos === -1 ? "none" : "";
+      d.classList.toggle("active", pos !== -1 && pos <= idx);
+    });
+  }
+
+  function goTo(id, dir){
+    document.querySelectorAll(".step").forEach((s) => s.classList.remove("active", "back"));
+    const s = document.querySelector(`.step[data-step="${id}"]`);
+    s.classList.add("active");
+    if (dir === "back") s.classList.add("back");
+    current = id;
+    updateDots();
+    if (id === "3"){
+      updateSummary();
+      submitBtn.textContent = asistira === "si" ? "Confirmar asistencia" : "Enviar respuesta";
+    }
+  }
+  const next = () => { const i = flow.indexOf(current); if (i < flow.length - 1) goTo(flow[i + 1]); };
+  const back = () => { const i = flow.indexOf(current); if (i > 0) goTo(flow[i - 1], "back"); };
+
+  choices.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      choices.forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      asistira = btn.dataset.value;
+      flow = asistira === "si" ? ["1", "2", "3"] : ["1", "3"];
+      updateDots();
+      setTimeout(next, 420);
+    });
+  });
+  document.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", next));
+  document.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", back));
+
+  // Contador de acompañantes
+  function setComp(n){
+    n = Math.max(0, Math.min(permitidos, n));
+    $("num_acompanantes").value = n;
+    $("comp-val").textContent = n;
+  }
+  $("comp-minus").addEventListener("click", () => setComp(Number($("num_acompanantes").value) - 1));
+  $("comp-plus").addEventListener("click", () => setComp(Number($("num_acompanantes").value) + 1));
+
+  function updateSummary(){
+    const ul = $("summary");
+    ul.textContent = "";
+    const add = (k, v) => {
+      const li = document.createElement("li");
+      const b = document.createElement("b"); b.textContent = k;
+      const s = document.createElement("span"); s.textContent = v;
+      li.append(b, s);
+      ul.appendChild(li);
+    };
+    if (asistira === "si"){
+      add("Asistencia", "Sí, ahí estaré");
+      if (acompanantes.length > 0) add("Te acompañan", attendingNames().join(", ") || "Voy solo/a");
+      else if (permitidos > 0) add("Acompañantes", String($("num_acompanantes").value));
+      const r = $("restricciones").value.trim(); if (r) add("Alimentación", r);
+      const c = $("cancion").value.trim(); if (c) add("Tu canción", c);
+    } else if (asistira === "no"){
+      add("Asistencia", "No podré asistir");
+    }
+  }
+
+  $("rsvp-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (current !== "3"){ if (asistira) next(); return; } // Enter en un campo = continuar
+    if (!asistira || !guestId) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Enviando…";
+    $("rsvp-error").classList.remove("show");
+
+    const payload = {
+      id: guestId,
+      asistira: asistira,
+      num_acompanantes: asistira === "si" ? Number($("num_acompanantes").value || 0) : 0,
+      comentario: $("comentario").value || "",
+      acompanantes_asistentes: asistira === "si" ? attendingNames().join(", ") : "",
+      restricciones_alimentarias: asistira === "si" ? ($("restricciones").value || "") : "",
+      cancion_sugerida: asistira === "si" ? ($("cancion").value || "") : ""
+    };
+
+    try{
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // evita preflight CORS
+        body: JSON.stringify(payload)
+      });
+      let out = null;
+      try { out = await res.json(); } catch (_) { /* respuesta no legible: se asume guardada */ }
+      if (out && out.error) throw new Error(out.error);
+      console.log("Respuesta del servidor:", out);
+
+      $("rsvp-form").style.display = "none";
+      $("rsvp-dots").style.display = "none";
+      $("rsvp-success-msg").textContent = asistira === "si"
+        ? "¡Gracias por confirmar! Te esperamos con mucha ilusión."
+        : "Gracias por avisarnos. ¡Te vamos a extrañar ese día!";
+      $("rsvp-success-who").textContent = (asistira === "si" && payload.acompanantes_asistentes)
+        ? "Te acompañan: " + payload.acompanantes_asistentes : "";
+      $("rsvp-success").classList.add("show");
+      if (asistira === "si") spawnPetals($("rsvp"), 34, true);
+    } catch(err){
+      $("rsvp-error").classList.add("show");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Reintentar";
+    }
+  });
+
+  // ======= Música de fondo =======
+  const musicBtn = $("music-toggle");
+  const bgMusic = $("bg-music");
+  let musicPlaying = false;
+
+  musicBtn.addEventListener("click", () => {
+    if (musicPlaying){
+      bgMusic.pause();
+      musicPlaying = false;
+    } else {
+      bgMusic.play().catch(() => { /* sin archivo de música todavía */ });
+      musicPlaying = true;
+    }
+    musicBtn.classList.toggle("playing", musicPlaying);
+    musicBtn.setAttribute("aria-pressed", String(musicPlaying));
+  });
+
+  // ======= Protección básica de imágenes (disuasoria, no impide capturas) =======
+  document.addEventListener("contextmenu", (e) => { if (e.target.closest("img, .protect")) e.preventDefault(); });
+  document.addEventListener("dragstart", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
+
+  // ======= Descargar .ics =======
+  $("btn-ics").addEventListener("click", () => {
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "BEGIN:VEVENT",
+      "SUMMARY:Boda de María del Mar & Faiber",
+      "LOCATION:Hacienda Marroquín, Chía",
+      "DESCRIPTION:Nos casamos y queremos celebrarlo contigo.",
+      "DTSTART:20270219T200000Z",
+      "DTEND:20270220T010000Z",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "boda-maria-del-mar-y-faiber.ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+</script>
+
+</body>
+</html>
