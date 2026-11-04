@@ -364,6 +364,7 @@
   @keyframes bob{ 0%,100%{ transform: translateY(0); opacity:.5; } 50%{ transform: translateY(8px); opacity:1; } }
 
   /* ---------- Secciones ---------- */
+  #regalos{ padding: 104px 0 96px; }
   section.sec{ padding: 84px 0; position: relative; overflow: hidden; }
   section.sec + section.sec::before{
     content:""; position:absolute; top:0; left:50%; width:0; height:1px; background: var(--line);
@@ -898,7 +899,11 @@
   </section>
 
   <!-- ===== REGALOS ===== -->
-  <section class="sec" id="regalos">
+  <section class="sec alt" id="regalos">
+    <svg class="golden" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path pathLength="1" d="M-40,190 C 200,260 420,70 640,160 S 1000,250 1240,140"/>
+      <path pathLength="1" d="M-40,130 C 240,40 440,240 680,150 S 1040,60 1240,170"/>
+    </svg>
     <div class="wrap section-inner">
       <div class="gift-card rv-zoom">
         <div class="ico-wrap rv-zoom" style="--d:.1s"><svg class="ico"><use href="#i-mail"/></svg></div>
@@ -913,7 +918,7 @@
   </section>
 
   <!-- ===== RSVP ===== -->
-  <section class="sec alt" id="rsvp">
+  <section class="sec" id="rsvp">
     <svg class="golden" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <path pathLength="1" d="M-40,190 C 200,260 420,70 640,160 S 1000,250 1240,140"/>
       <path pathLength="1" d="M-40,130 C 240,40 440,240 680,150 S 1040,60 1240,170"/>
